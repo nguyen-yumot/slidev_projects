@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Slidev export artifacts
+slides-export.pdf
+slides-export.pptx
+slides-export.png
+*-export.pdf
+*-export.pptx
+*-export.png
+
+# Editor/IDE
+.vscode
+.idea
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*

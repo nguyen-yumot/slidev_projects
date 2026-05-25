@@ -1,0 +1,53 @@
+/* Slidev Tutorial — global design tokens & cross-slide refinements.
+   Loaded automatically via styles/index.ts. */
+
+:root {
+  --deck-accent: #2b90b6;
+  --deck-accent-deep: #1e6e8c;
+  --deck-tip: #0ea672;
+  --deck-warning: #d98410;
+  --deck-note: #5b6ee0;
+  --deck-try: #8b5cf6;
+  --deck-radius: 10px;
+}
+
+/* Consistent, softly-rounded code blocks on every slide. */
+.slidev-layout pre,
+.slidev-layout .shiki {
+  border-radius: var(--deck-radius);
+}
+
+/* Comfortable reading rhythm for explanatory lists. */
+.slidev-layout ul,
+.slidev-layout ol {
+  line-height: 1.7;
+}
+
+/* One accent colour for every inline link. */
+.slidev-layout a {
+  color: var(--deck-accent);
+  text-underline-offset: 3px;
+}
+
+/* Reusable accent eyebrow — used by section dividers and track intros. */
+.deck-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+/* Monospace pill — direct-class form for slide markdown (`<div class="deck-chip">`).
+   Kept as a global rule because components/Chip.vue's scoped style only matches
+   elements inside the Chip template, not raw divs in .md files. */
+.deck-chip {
+  display: inline-block;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--deck-accent) 25%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  line-height: 1.2;
+}

@@ -1,0 +1,6 @@
+# The Playwright browser binary is installed separately via
+# `playwright install chromium`, so playwright-chromium's postinstall
+# script is intentionally skipped. This keeps `slidev build` — which
+# runs an internal `pnpm install` — from failing on an unapproved build.
+allowBuilds:
+  playwright-chromium: false
