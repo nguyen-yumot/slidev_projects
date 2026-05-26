@@ -1,53 +1,281 @@
-/* Slidev Tutorial — global design tokens & cross-slide refinements.
-   Loaded automatically via styles/index.ts. */
+/* Slidev deck — design tokens & cross-slide refinements.
+   Loaded automatically via styles/index.ts.
+   See plans/beautify-the-customized-slidev-splendid-falcon.md for the rationale. */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ---------- Light tokens ---------- */
 :root {
-  --deck-accent: #2b90b6;
-  --deck-accent-deep: #1e6e8c;
-  --deck-tip: #0ea672;
-  --deck-warning: #d98410;
-  --deck-note: #5b6ee0;
-  --deck-try: #8b5cf6;
-  --deck-radius: 10px;
+  /* Accent — ocean blue */
+  --deck-accent:        #0284c7;   /* sky-600 */
+  --deck-accent-deep:   #075985;   /* sky-800 */
+  --deck-accent-soft:   #e0f2fe;   /* sky-100 */
+  --deck-accent-glow:   oklch(70% 0.15 230 / 0.35);
+
+  /* Semantic alert colors — kept cool & oceanic where possible */
+  --deck-tip:     #0d9488;   /* teal-600 — sea green */
+  --deck-warning: #d97706;   /* amber-600 — warm signal */
+  --deck-note:    #0284c7;   /* matches accent */
+  --deck-try:     #06b6d4;   /* cyan-500 — bright aqua */
+
+  /* Surfaces — slightly cool whites */
+  --deck-bg:         #f8fafc;
+  --deck-surface:    #ffffff;
+  --deck-surface-2:  #f1f5f9;
+  --deck-glass:      rgba(255, 255, 255, 0.62);
+  --deck-glass-tint: rgba(2, 132, 199, 0.04);
+
+  /* Borders */
+  --deck-border:        rgba(15, 23, 42, 0.08);
+  --deck-border-strong: rgba(15, 23, 42, 0.14);
+  --deck-border-grad:   linear-gradient(135deg, rgba(2, 132, 199, 0.38), rgba(8, 145, 178, 0.22));
+
+  /* Text */
+  --deck-text:        #0f172a;
+  --deck-text-strong: #020617;
+  --deck-text-muted:  #475569;
+  --deck-text-faint:  #94a3b8;
+
+  /* Radii */
+  --deck-radius-sm: 6px;
+  --deck-radius:    12px;
+  --deck-radius-md: 16px;
+  --deck-radius-lg: 22px;
+  --deck-radius-xl: 28px;
+
+  /* Spacing scale */
+  --deck-space-1: 0.25rem;
+  --deck-space-2: 0.5rem;
+  --deck-space-3: 0.75rem;
+  --deck-space-4: 1rem;
+  --deck-space-5: 1.5rem;
+  --deck-space-6: 2rem;
+  --deck-space-7: 3rem;
+
+  /* Shadows — soft, layered, ocean-tinted */
+  --deck-shadow-sm:    0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --deck-shadow:       0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --deck-shadow-md:    0 12px 32px -8px rgba(7, 89, 133, 0.14), 0 4px 12px rgba(15, 23, 42, 0.05);
+  --deck-shadow-lg:    0 28px 60px -20px rgba(7, 89, 133, 0.22), 0 10px 24px rgba(15, 23, 42, 0.06);
+  --deck-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* Blur */
+  --deck-blur-sm: 6px;
+  --deck-blur:    14px;
+  --deck-blur-lg: 28px;
+
+  /* Layout vars (extracted from layouts) */
+  --deck-section-max:    72%;
+  --deck-section-pad:    3.5rem;
+  --deck-multicol-pad-y: 2.2rem;
+  --deck-multicol-pad-x: 3rem;
+
+  /* Fonts */
+  --deck-font-display: 'Fraunces', 'Inter Tight', ui-serif, Georgia, serif;
+  --deck-font-body:    'Inter Tight', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --deck-font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* Consistent, softly-rounded code blocks on every slide. */
-.slidev-layout pre,
-.slidev-layout .shiki {
-  border-radius: var(--deck-radius);
+/* ---------- Dark tokens — deep-sea palette ---------- */
+.dark {
+  --deck-accent:        #38bdf8;   /* sky-400 */
+  --deck-accent-deep:   #7dd3fc;   /* sky-300 */
+  --deck-accent-soft:   rgba(56, 189, 248, 0.16);
+  --deck-accent-glow:   oklch(70% 0.15 230 / 0.45);
+
+  --deck-tip:     #2dd4bf;   /* teal-400 */
+  --deck-warning: #fbbf24;
+  --deck-note:    #38bdf8;
+  --deck-try:     #22d3ee;   /* cyan-400 */
+
+  --deck-bg:         #060b14;   /* deep-sea night */
+  --deck-surface:    #0d1623;
+  --deck-surface-2:  #14202f;
+  --deck-glass:      rgba(20, 32, 47, 0.55);
+  --deck-glass-tint: rgba(56, 189, 248, 0.06);
+
+  --deck-border:        rgba(255, 255, 255, 0.08);
+  --deck-border-strong: rgba(255, 255, 255, 0.16);
+  --deck-border-grad:   linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(34, 211, 238, 0.30));
+
+  --deck-text:        #e5e7eb;
+  --deck-text-strong: #f8fafc;
+  --deck-text-muted:  #94a3b8;
+  --deck-text-faint:  #64748b;
+
+  --deck-shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.4);
+  --deck-shadow:       0 6px 16px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.35);
+  --deck-shadow-md:    0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --deck-shadow-lg:    0 32px 72px -20px rgba(0, 0, 0, 0.65), 0 12px 28px rgba(0, 0, 0, 0.5);
+  --deck-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* Comfortable reading rhythm for explanatory lists. */
+/* ---------- Base typography & surface ---------- */
+.slidev-layout {
+  font-family: var(--deck-font-body);
+  color: var(--deck-text);
+  background: var(--deck-bg);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+}
+
+.slidev-layout h1,
+.slidev-layout h2 {
+  color: var(--deck-text-strong);
+  letter-spacing: -0.01em;
+}
+.slidev-layout h1 {
+  font-family: var(--deck-font-display);
+  font-weight: 700;
+  font-size: 2.1rem;
+  line-height: 1.15;
+}
+.slidev-layout h2 {
+  font-family: var(--deck-font-body);
+  font-weight: 700;
+  font-size: 1.55rem;
+  line-height: 1.25;
+}
+.slidev-layout h3 {
+  font-family: var(--deck-font-body);
+  font-weight: 600;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: var(--deck-text-strong);
+}
+
+.slidev-layout p,
+.slidev-layout li {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* Lists — comfortable reading rhythm, accent bullets */
 .slidev-layout ul,
 .slidev-layout ol {
   line-height: 1.7;
 }
+.slidev-layout ul ::marker,
+.slidev-layout ol ::marker {
+  color: var(--deck-accent);
+}
 
-/* One accent colour for every inline link. */
+/* Links — accent + interactive states */
 .slidev-layout a {
   color: var(--deck-accent);
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+  transition: color 0.15s ease;
+}
+.slidev-layout a:hover {
+  color: var(--deck-accent-deep);
+}
+.slidev-layout a:focus-visible {
+  outline: 2px solid var(--deck-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
-/* Reusable accent eyebrow — used by section dividers and track intros. */
+/* Code blocks — soft surface with inset highlight */
+.slidev-layout pre,
+.slidev-layout .shiki {
+  border-radius: var(--deck-radius-md);
+  padding: 1rem 1.15rem;
+  background: var(--deck-surface-2);
+  box-shadow: var(--deck-shadow-sm), var(--deck-shadow-inset);
+  border: 1px solid var(--deck-border);
+  font-family: var(--deck-font-mono);
+}
+
+/* Inline code — glass-tint pill */
+.slidev-layout :not(pre) > code {
+  background: var(--deck-glass-tint);
+  border: 1px solid var(--deck-border);
+  padding: 0.1em 0.4em;
+  border-radius: var(--deck-radius-sm);
+  font-family: var(--deck-font-mono);
+  font-size: 0.88em;
+}
+
+/* Blockquote — quiet accent rail */
+.slidev-layout blockquote {
+  border-left: 3px solid var(--deck-accent);
+  background: var(--deck-glass-tint);
+  padding: 0.6rem 1rem;
+  border-radius: 0 var(--deck-radius) var(--deck-radius) 0;
+  font-style: italic;
+  color: var(--deck-text-muted);
+  margin: 0.8rem 0;
+}
+.slidev-layout blockquote p { margin: 0.2rem 0; }
+
+/* Selection + scrollbar polish */
+::selection {
+  background: var(--deck-accent-soft);
+  color: var(--deck-text-strong);
+}
+.slidev-layout *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.slidev-layout *::-webkit-scrollbar-thumb {
+  background: var(--deck-border-strong);
+  border-radius: 999px;
+}
+.slidev-layout *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- Reusable accent eyebrow ----------
+   Global rule because slides.md uses `<div class="deck-eyebrow">` directly,
+   and layouts/section.vue overrides it via :deep(.deck-eyebrow). */
 .deck-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  opacity: 0.75;
+  color: var(--deck-text-muted);
+  font-family: var(--deck-font-body);
+}
+.deck-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, var(--deck-accent), var(--deck-try));
+  flex-shrink: 0;
 }
 
-/* Monospace pill — direct-class form for slide markdown (`<div class="deck-chip">`).
-   Kept as a global rule because components/Chip.vue's scoped style only matches
-   elements inside the Chip template, not raw divs in .md files. */
+/* ---------- Monospace pill (global form for raw .md usage) ----------
+   Direct-class form: <div class="deck-chip">…</div>. The scoped style in
+   Chip.vue mirrors these rules. */
 .deck-chip {
   display: inline-block;
-  padding: 0.4rem 0.55rem;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--deck-accent) 25%, transparent);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--deck-radius-sm);
+  background: var(--deck-glass-tint);
+  border: 1px solid var(--deck-border);
+  box-shadow: var(--deck-shadow-inset);
+  font-family: var(--deck-font-mono);
   font-size: 0.85em;
   line-height: 1.2;
+  color: var(--deck-text);
+  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
+  backdrop-filter: blur(var(--deck-blur-sm));
+}
+
+/* ---------- Backdrop-filter fallback (PDF export, older renderers) ----------
+   When backdrop-filter is unsupported, swap glass surfaces to opaque so nothing
+   disappears against the page background. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --deck-glass: var(--deck-surface);
+    --deck-glass-tint: var(--deck-surface-2);
+  }
+  .dark {
+    --deck-glass: var(--deck-surface);
+    --deck-glass-tint: var(--deck-surface-2);
+  }
 }

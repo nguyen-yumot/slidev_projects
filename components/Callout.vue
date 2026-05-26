@@ -4,8 +4,13 @@
   Usage:
     <Callout type="tip">Keep slides to one idea each.</Callout>
     <Callout type="warning" title="Heads up">This needs a dependency.</Callout>
+    <Callout type="note" size="sm" compact>Inline aside.</Callout>
+    <Callout type="try" tone="solid">Filled emphasis variant.</Callout>
 
   Types: tip | warning | note | try
+  Sizes: sm | md (default) | lg
+  Tones: soft (default) | solid | outline
+  compact: drops the icon tile and label row for tight inline use.
 -->
 <script setup lang="ts">
 import { computed } from 'vue'
@@ -13,7 +18,10 @@ import { computed } from 'vue'
 const props = withDefaults(defineProps<{
   type?: 'tip' | 'warning' | 'note' | 'try'
   title?: string
-}>(), { type: 'note' })
+  size?: 'sm' | 'md' | 'lg'
+  compact?: boolean | string
+  tone?: 'soft' | 'solid' | 'outline'
+}>(), { type: 'note', size: 'md', tone: 'soft' })
 
 const presets = {
   tip:     { color: 'var(--deck-tip)',     icon: 'i-carbon-idea',        label: 'Tip' },
@@ -23,13 +31,22 @@ const presets = {
 } as const
 
 const preset = computed(() => presets[props.type])
+// MDC passes bare attributes as "", Vue passes booleans — accept both.
+const isCompact = computed(() => props.compact !== undefined && props.compact !== false)
 </script>
 
 <template>
-  <div class="deck-callout" :style="{ '--c': preset.color }">
-    <div class="deck-callout__icon" :class="preset.icon" />
+  <div
+    class="deck-callout"
+    :class="[`deck-callout--${size}`, `deck-callout--${tone}`, { 'deck-callout--compact': isCompact }]"
+    :style="{ '--c': preset.color }"
+  >
+    <div v-if="!isCompact" class="deck-callout__icon-tile">
+      <div class="deck-callout__icon" :class="preset.icon" />
+    </div>
+    <div v-else class="deck-callout__icon deck-callout__icon--inline" :class="preset.icon" />
     <div class="deck-callout__content">
-      <div class="deck-callout__title">{{ title ?? preset.label }}</div>
+      <div v-if="!isCompact" class="deck-callout__title">{{ title ?? preset.label }}</div>
       <div class="deck-callout__body"><slot /></div>
     </div>
   </div>
@@ -38,29 +55,91 @@ const preset = computed(() => presets[props.type])
 <style scoped>
 .deck-callout {
   display: flex;
-  gap: 0.7rem;
-  padding: 0.8rem 1rem;
-  border-radius: var(--deck-radius, 10px);
-  border-left: 4px solid var(--c);
-  background: color-mix(in srgb, var(--c) 9%, transparent);
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--deck-radius-md);
+  border: 1px solid color-mix(in srgb, var(--c) 22%, var(--deck-border));
+  background: var(--deck-glass);
+  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
+  backdrop-filter: blur(var(--deck-blur-sm));
+  box-shadow: var(--deck-shadow-sm);
   font-size: 0.92em;
   line-height: 1.55;
+  color: var(--deck-text);
+  position: relative;
+  overflow: hidden;
+}
+/* Gradient accent rail along the left edge. */
+.deck-callout::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 30%, transparent));
+}
+
+.deck-callout__icon-tile {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
 }
 .deck-callout__icon {
   color: var(--c);
-  font-size: 1.25rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
+  font-size: 1.05rem;
 }
+.deck-callout__icon--inline {
+  font-size: 1.1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
 .deck-callout__title {
   color: var(--c);
-  font-weight: 700;
-  font-size: 0.74em;
+  font-weight: 600;
+  font-size: 0.72em;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 0.15rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.2rem;
 }
-.deck-callout__body :deep(p) { margin: 0.2rem 0; }
-.deck-callout__body :deep(p:first-child) { margin-top: 0; }
+.deck-callout__body :deep(p)            { margin: 0.2rem 0; }
+.deck-callout__body :deep(p:first-child){ margin-top: 0; }
 .deck-callout__body :deep(p:last-child) { margin-bottom: 0; }
+
+/* Size variants */
+.deck-callout--sm { padding: 0.6rem 0.8rem; font-size: 0.85em; gap: 0.55rem; }
+.deck-callout--sm .deck-callout__icon-tile { width: 22px; height: 22px; border-radius: 6px; }
+.deck-callout--sm .deck-callout__icon { font-size: 0.9rem; }
+
+.deck-callout--lg { padding: 1.1rem 1.25rem; font-size: 1em; gap: 0.9rem; }
+.deck-callout--lg .deck-callout__icon-tile { width: 34px; height: 34px; border-radius: 10px; }
+.deck-callout--lg .deck-callout__icon { font-size: 1.25rem; }
+
+/* Tone variants */
+.deck-callout--solid {
+  background: color-mix(in srgb, var(--c) 14%, var(--deck-surface));
+  border-color: color-mix(in srgb, var(--c) 32%, transparent);
+}
+.deck-callout--outline {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: color-mix(in srgb, var(--c) 38%, transparent);
+  box-shadow: none;
+}
+
+/* Compact variant — title is omitted from the template; this just tightens
+   spacing and centers the icon vertically with the body text. */
+.deck-callout--compact {
+  padding: 0.45rem 0.7rem;
+  gap: 0.5rem;
+  align-items: center;
+}
+.deck-callout--compact .deck-callout__body { font-size: 0.95em; }
 </style>

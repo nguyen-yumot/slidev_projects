@@ -3,6 +3,7 @@
 
   Usage:
     <Chips>default, cover, center</Chips>
+    <Chips tone="accent" size="sm">v1, v2, v3</Chips>
 
   Slot content is a comma-separated string; whitespace around commas is
   trimmed. Renders one <Chip> per item — the plural of <Chip>, already laid
@@ -11,6 +12,13 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
 import Chip from './Chip.vue'
+
+type Tone = 'neutral' | 'accent' | 'tip' | 'warning' | 'note' | 'try'
+
+withDefaults(defineProps<{
+  tone?: Tone
+  size?: 'sm' | 'md'
+}>(), { tone: 'neutral', size: 'md' })
 
 const slots = useSlots()
 
@@ -31,7 +39,7 @@ const labels = computed(() => {
 
 <template>
   <span class="deck-chips">
-    <Chip v-for="(label, i) in labels" :key="i">{{ label }}</Chip>
+    <Chip v-for="(label, i) in labels" :key="i" :tone="tone" :size="size">{{ label }}</Chip>
   </span>
 </template>
 

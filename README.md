@@ -5,6 +5,20 @@ example deck in `slides.md` shows every piece rendered; delete it and write your
 `components/`, `layouts/`, and `styles/` folders are auto-imported at the project level, so
 they apply to any deck you add to the repo.
 
+```
+Convert @slides_im.md  with images in multiple folders into the repo's customized Slidev format
+```
+
+For Japanese:
+```
+fonts:
+  sans: "Hiragino Kaku Gothic ProN, Yu Gothic, sans-serif"
+  serif: "Hiragino Mincho ProN, Yu Mincho, serif"
+  local: "Hiragino Kaku Gothic ProN, Yu Gothic, Hiragino Mincho ProN, Yu Mincho"
+```
+
+
+
 ## Quick start
 
 ```bash
@@ -105,6 +119,33 @@ src: ./pages/your-section.md
 ```
 
 Drop new layouts in `layouts/` and new components in `components/` — both are auto-imported.
+
+## Convert an existing Markdown file into a deck
+
+Have a plain Markdown file you want turned into a deck in this repo's format? In Claude Code,
+the `slidev-deck-authoring` skill (in `.claude/skills/`) knows the conventions. Paste a prompt
+like this, swapping in your filename:
+
+```text
+Convert AAA.md into a Slidev deck using this repo's toolkit and conventions:
+- create Slidev_AAA.md at the repo root (headmatter + cover + one src: block per section)
+- split the sections into pages/AAA/01-….md, 02-….md, …
+- copy any images/assets under public/AAA/, mirroring their original subfolder structure
+  (so files in different source folders never collide), and reference each from the web
+  root as /AAA/… — never a ./public or relative path
+- open each part with a `layout: section` divider and use the toolkit components
+  (Callout, FeatureCard, KeyCaps, multicolumns) instead of flat Markdown where it helps
+- leave the original AAA.md untouched
+```
+
+The result lands alongside the existing decks:
+
+```
+AAA.md                  original source (left as-is)
+Slidev_AAA.md           new root deck — run it with `pnpm dev Slidev_AAA.md`
+pages/AAA/01-….md       section files pulled in via src:
+public/AAA/…            assets, mirroring source folders, referenced as /AAA/… in slides
+```
 
 ## Reusing this toolkit elsewhere
 

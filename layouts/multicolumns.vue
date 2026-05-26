@@ -23,7 +23,8 @@
 
   The default slot (the slide body — typically a `# Heading`) sits above
   the columns. No gradient background — these slides stay clean so
-  the dense content is the focus.
+  the dense content is the focus. Hairline column dividers + a gradient
+  bar above the heading give quiet visual structure.
 -->
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
@@ -57,27 +58,42 @@ const gridClass = computed(() => {
 <style scoped>
 .deck-multicol {
   height: 100%;
-  padding: 2.2rem 3rem 2.4rem;
+  padding: var(--deck-multicol-pad-y) var(--deck-multicol-pad-x);
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.4rem;
+}
+
+/* Gradient chapter bar above the heading. */
+.deck-multicol__heading::before {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--deck-border-grad);
+  margin-bottom: 0.7rem;
 }
 .deck-multicol__heading :deep(h1) {
-  font-size: 1.9rem;
+  font-family: var(--deck-font-display);
+  font-size: 2.1rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
-  color: var(--deck-accent-deep);
+  color: var(--deck-text-strong);
+  line-height: 1.15;
 }
 .deck-multicol__heading :deep(h1 + p),
 .deck-multicol__heading :deep(p) {
-  margin-top: 0.35rem;
-  opacity: 0.75;
-  font-size: 0.95rem;
+  margin-top: 0.4rem;
+  color: var(--deck-text-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
 
 .deck-multicol__grid {
   display: grid;
-  gap: 1.4rem 1.8rem;
+  gap: 1.6rem 2rem;
   flex: 1;
   min-height: 0;
 }
@@ -88,12 +104,18 @@ const gridClass = computed(() => {
 
 .deck-multicol__col {
   font-size: 0.88em;
-  line-height: 1.55;
+  line-height: 1.6;
   min-width: 0;
+  color: var(--deck-text);
+}
+/* Hairline divider between columns — only visible up close. */
+.deck-multicol__col:not(:first-child) {
+  border-left: 1px solid var(--deck-border);
+  padding-left: var(--deck-space-5);
 }
 .deck-multicol__col :deep(p:first-child) { margin-top: 0; }
-.deck-multicol__col :deep(p:last-child) { margin-bottom: 0; }
-.deck-multicol__col :deep(pre) { margin: 0.45rem 0; }
+.deck-multicol__col :deep(p:last-child)  { margin-bottom: 0; }
+.deck-multicol__col :deep(pre)           { margin: 0.5rem 0; }
 .deck-multicol__col :deep(ul),
-.deck-multicol__col :deep(ol) { margin: 0.3rem 0; padding-left: 1.1rem; }
+.deck-multicol__col :deep(ol)            { margin: 0.35rem 0; padding-left: 1.1rem; }
 </style>
