@@ -33,7 +33,7 @@ layout: default
 <div class="grid grid-cols-2 gap-4 pt-4">
 
 <FeatureCard title="Callout" icon="i-carbon-chat" row>
-Coloured advice boxes — <code>type</code> of tip, warning, note, or try.
+Coloured advice boxes — <code>type</code> of tip, warning, note, try, or blank (neutral, no icon/label).
 </FeatureCard>
 
 <FeatureCard title="FeatureCard" icon="i-carbon-grid" row>
@@ -54,6 +54,10 @@ Monospace pills: <Chips>default, cover, center</Chips>.
 
 <Callout type="tip">
 Edit any <code>.md</code> and the dev server hot-reloads. Set a per-slide layout with the <code>layout:</code> frontmatter key.
+</Callout>
+
+<Callout type="blank">
+Use <code>type="blank"</code> for a neutral highlight — no icon, no label, just the rail.
 </Callout>
 
 </div>

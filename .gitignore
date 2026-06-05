@@ -1,27 +1,33 @@
-# macOS
+# ─── Whitelist: this repo tracks only the customization toolkit ───────
+# Strategy: ignore EVERYTHING, then re-include just the toolkit folders
+# and a short list of root files. Anything else — any deck, asset folder,
+# script, or new root file, now or in the future — is ignored by default
+# and will not be committed.
+
+# Ignore every top-level entry...
+/*
+
+# ...re-include the toolkit folders...
+!/components/
+!/layouts/
+!/styles/
+
+# ...and these root files only.
+!/.gitignore
+!/package.json
+!/pnpm-lock.yaml
+!/pnpm-workspace.yaml
+!/README.md
+!/slides.md
+
+# One file out of pages/ — the demo section slides.md imports via src:.
+# Re-include the dir (so git descends), ignore its contents, then keep
+# just this one file. Everything else under pages/ stays ignored.
+!/pages/
+/pages/*
+!/pages/example.md
+
+# Junk to keep out even inside the tracked folders above.
 .DS_Store
-
-# Dependencies
-node_modules
-
-# Build output
-dist
-
-# Slidev export artifacts
-slides-export.pdf
-slides-export.pptx
-slides-export.png
-*-export.pdf
-*-export.pptx
-*-export.png
-
-# Editor/IDE
-.vscode
-.idea
 *.swp
-
-# Logs
 *.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*

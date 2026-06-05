@@ -6,8 +6,9 @@
     <Callout type="warning" title="Heads up">This needs a dependency.</Callout>
     <Callout type="note" size="sm" compact>Inline aside.</Callout>
     <Callout type="try" tone="solid">Filled emphasis variant.</Callout>
+    <Callout type="blank">Highlighted text with no label or icon.</Callout>
 
-  Types: tip | warning | note | try
+  Types: tip | warning | note | try | blank
   Sizes: sm | md (default) | lg
   Tones: soft (default) | solid | outline
   compact: drops the icon tile and label row for tight inline use.
@@ -16,7 +17,7 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  type?: 'tip' | 'warning' | 'note' | 'try'
+  type?: 'tip' | 'warning' | 'note' | 'try' | 'blank'
   title?: string
   size?: 'sm' | 'md' | 'lg'
   compact?: boolean | string
@@ -28,6 +29,7 @@ const presets = {
   warning: { color: 'var(--deck-warning)', icon: 'i-carbon-warning',     label: 'Watch out' },
   note:    { color: 'var(--deck-note)',    icon: 'i-carbon-information', label: 'Note' },
   try:     { color: 'var(--deck-try)',     icon: 'i-carbon-rocket',      label: 'Try it yourself' },
+  blank:   { color: 'var(--deck-text-muted)', icon: '',                  label: '' },
 } as const
 
 const preset = computed(() => presets[props.type])
@@ -38,15 +40,15 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
 <template>
   <div
     class="deck-callout"
-    :class="[`deck-callout--${size}`, `deck-callout--${tone}`, { 'deck-callout--compact': isCompact }]"
+    :class="[`deck-callout--${size}`, `deck-callout--${tone}`, `deck-callout--${type}`, { 'deck-callout--compact': isCompact }]"
     :style="{ '--c': preset.color }"
   >
-    <div v-if="!isCompact" class="deck-callout__icon-tile">
+    <div v-if="!isCompact && preset.icon" class="deck-callout__icon-tile">
       <div class="deck-callout__icon" :class="preset.icon" />
     </div>
-    <div v-else class="deck-callout__icon deck-callout__icon--inline" :class="preset.icon" />
+    <div v-else-if="isCompact && preset.icon" class="deck-callout__icon deck-callout__icon--inline" :class="preset.icon" />
     <div class="deck-callout__content">
-      <div v-if="!isCompact" class="deck-callout__title">{{ title ?? preset.label }}</div>
+      <div v-if="!isCompact && (title ?? preset.label)" class="deck-callout__title">{{ title ?? preset.label }}</div>
       <div class="deck-callout__body"><slot /></div>
     </div>
   </div>
@@ -133,6 +135,28 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   border-color: color-mix(in srgb, var(--c) 38%, transparent);
   box-shadow: none;
 }
+
+/* Blank variant — minimal highlight, no icon/label.
+   The rail becomes a deliberate centered bar and the body sits with a touch
+   more left air to compensate for the missing icon-tile. */
+.deck-callout--blank { padding-left: 1.75rem; }
+.deck-callout--blank.deck-callout--sm { padding-left: 1.4rem; }
+.deck-callout--blank.deck-callout--lg { padding-left: 2.1rem; }
+.deck-callout--blank::before {
+  width: 4px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c) 18%, transparent) 0%,
+    var(--c) 38%,
+    var(--c) 62%,
+    color-mix(in srgb, var(--c) 18%, transparent) 100%
+  );
+}
+.deck-callout--blank.deck-callout--solid {
+  background: var(--deck-surface-2);
+  border-color: var(--deck-border-strong);
+}
+.deck-callout--blank.deck-callout--compact { padding-left: 1.1rem; }
 
 /* Compact variant — title is omitted from the template; this just tightens
    spacing and centers the icon vertically with the body text. */

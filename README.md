@@ -78,7 +78,7 @@ Components are auto-imported — use them directly in any slide.
 
 | Component | What it does |
 | --- | --- |
-| `<Callout type="tip\|warning\|note\|try" title="…">` | Coloured advice box with a Carbon icon. |
+| `<Callout type="tip\|warning\|note\|try\|blank" title="…">` | Coloured advice box with a Carbon icon. `blank` drops the icon and label for a plain neutral highlight. |
 | `<FeatureCard title="…" icon="i-carbon-grid" row>` | Titled card for overviews; `row` puts icon + title inline. |
 | `<KeyCap>o</KeyCap>` / `<KeyCaps>Space,→</KeyCaps>` | Render keys as keyboard caps. |
 | `<Chip>cover</Chip>` / `<Chips>a, b, c</Chips>` | Monospace pills. |

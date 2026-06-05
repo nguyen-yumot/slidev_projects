@@ -17,6 +17,8 @@
   --deck-warning: #d97706;   /* amber-600 — warm signal */
   --deck-note:    #0284c7;   /* matches accent */
   --deck-try:     #06b6d4;   /* cyan-500 — bright aqua */
+  --deck-pos:     #16a34a;   /* green-600 — yes / allowed */
+  --deck-neg:     #dc2626;   /* red-600 — no / not allowed */
 
   /* Surfaces — slightly cool whites */
   --deck-bg:         #f8fafc;
@@ -87,6 +89,8 @@
   --deck-warning: #fbbf24;
   --deck-note:    #38bdf8;
   --deck-try:     #22d3ee;   /* cyan-400 */
+  --deck-pos:     #4ade80;   /* green-400 */
+  --deck-neg:     #f87171;   /* red-400 */
 
   --deck-bg:         #060b14;   /* deep-sea night */
   --deck-surface:    #0d1623;
