@@ -76,6 +76,10 @@ Components are auto-imported — use them directly in any slide.
 | `<Eyebrow>Part 3</Eyebrow>` | Uppercase tag above a title. |
 | `<ColHead>Heading</ColHead>` | Column heading inside `multicolumns`. |
 
+**Code blocks inside a Callout/FeatureCard** are supported: write them with the `::Callout{…}`
+block form, or the `<Callout>…</Callout>` form with a **blank line** around the code (without the
+blank lines the fence is silently dropped). Long lines scroll within the box instead of clipping.
+
 Layouts (set per slide via `layout:`):
 
 - **`section`** — full-bleed gradient divider for the start of a part.

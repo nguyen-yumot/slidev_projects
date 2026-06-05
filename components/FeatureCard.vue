@@ -86,6 +86,7 @@ const styleVars = computed(() =>
   color: var(--deck-text);
   height: 100%;
   position: relative;
+  min-width: 0;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -140,6 +141,18 @@ const styleVars = computed(() =>
 }
 .deck-card__body :deep(p) { margin: 0; }
 .deck-card__body :deep(p + p) { margin-top: 0.4rem; }
+
+/* Fenced code blocks inside a card — keep them within the card and scroll wide
+   lines instead of spilling past the rounded edge. */
+.deck-card__body :deep(pre) {
+  margin: 0.5rem 0 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85em;
+}
+.deck-card__body :deep(pre:first-child) { margin-top: 0; }
+.deck-card__body :deep(pre:last-child)  { margin-bottom: 0; }
 
 /* Row variant — icon tile next to title, body spans full width below. */
 .deck-card--row {

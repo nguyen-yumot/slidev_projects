@@ -115,7 +115,7 @@ const gridClass = computed(() => {
 }
 .deck-multicol__col :deep(p:first-child) { margin-top: 0; }
 .deck-multicol__col :deep(p:last-child)  { margin-bottom: 0; }
-.deck-multicol__col :deep(pre)           { margin: 0.5rem 0; }
+.deck-multicol__col :deep(pre)           { margin: 0.5rem 0; max-width: 100%; overflow-x: auto; }
 .deck-multicol__col :deep(ul),
 .deck-multicol__col :deep(ol)            { margin: 0.35rem 0; padding-left: 1.1rem; }
 </style>

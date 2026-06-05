@@ -102,6 +102,12 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   flex-shrink: 0;
 }
 
+/* min-width:0 lets this flex item shrink below its content, so a wide code
+   block scrolls (overflow-x:auto above) instead of stretching the callout. */
+.deck-callout__content {
+  min-width: 0;
+}
+
 .deck-callout__title {
   color: var(--c);
   font-weight: 600;
@@ -113,6 +119,19 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
 .deck-callout__body :deep(p)            { margin: 0.2rem 0; }
 .deck-callout__body :deep(p:first-child){ margin-top: 0; }
 .deck-callout__body :deep(p:last-child) { margin-bottom: 0; }
+
+/* Fenced code blocks inside a callout. The callout is overflow:hidden, so a
+   wide line would be silently clipped — constrain to the callout width and let
+   long lines scroll instead. Tighter padding/font so code sits inside neatly. */
+.deck-callout__body :deep(pre) {
+  margin: 0.45rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85em;
+}
+.deck-callout__body :deep(pre:first-child) { margin-top: 0; }
+.deck-callout__body :deep(pre:last-child)  { margin-bottom: 0; }
 
 /* Size variants */
 .deck-callout--sm { padding: 0.6rem 0.8rem; font-size: 0.85em; gap: 0.55rem; }
@@ -166,4 +185,12 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   align-items: center;
 }
 .deck-callout--compact .deck-callout__body { font-size: 0.95em; }
+
+/* Scale nested code down to match the small / compact callouts. */
+.deck-callout--sm .deck-callout__body :deep(pre),
+.deck-callout--compact .deck-callout__body :deep(pre) {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8em;
+  margin: 0.3rem 0;
+}
 </style>
