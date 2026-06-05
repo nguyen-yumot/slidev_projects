@@ -1,23 +1,14 @@
-# Slidev deck template
+# Slidev deck toolkit
 
-A [Slidev](https://sli.dev) starter with a small, reusable component toolkit baked in. The
-example deck in `slides.md` shows every piece rendered; delete it and write your own. The
-`components/`, `layouts/`, and `styles/` folders are auto-imported at the project level, so
-they apply to any deck you add to the repo.
+A [Slidev](https://sli.dev) workspace with a small, reusable component toolkit baked in. The
+`components/`, `layouts/`, and `styles/` folders are auto-imported at the project level, so they
+apply to any deck you add to the repo. Two reference decks ship with it: `slides.md` walks through
+every toolkit piece, and `Slidev_tutorial.md` is a beginner-to-advanced guide to Slidev itself.
 
-```
-Convert @slides_im.md  with images in multiple folders into the repo's customized Slidev format
-```
-
-For Japanese:
-```
-fonts:
-  sans: "Hiragino Kaku Gothic ProN, Yu Gothic, sans-serif"
-  serif: "Hiragino Mincho ProN, Yu Mincho, serif"
-  local: "Hiragino Kaku Gothic ProN, Yu Gothic, Hiragino Mincho ProN, Yu Mincho"
-```
-
-
+The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the
+config — and ignores everything else by default. You can author as many of your own decks as you
+like; they run locally but won't be committed unless you opt them in. See
+[What gets committed](#what-gets-committed-the-whitelist).
 
 ## Quick start
 
@@ -32,17 +23,17 @@ The dev server prints `http://localhost:3030`. Speaker view is at `/presenter`; 
 
 ### Available decks
 
-Any `.md` file at the repo root is a runnable deck. Today there are three:
+Any `.md` file at the repo root is a runnable deck. Two are tracked in the repo:
 
 | File | What it is | Run it with |
 | --- | --- | --- |
 | `slides.md` | Template walk-through of the component toolkit (default deck) | `pnpm dev` |
 | `Slidev_tutorial.md` | Beginner-to-advanced guide to Slidev itself | `pnpm dev Slidev_tutorial.md` |
-| `Slidev_nodejs.md` | Guided tour of the Node.js ecosystem | `pnpm dev Slidev_nodejs.md` |
 
-To add another deck, drop a new `your-deck.md` at the repo root and run
-`pnpm dev your-deck.md`. Section files split out into `pages/` are pulled in from a deck via
-the `src:` frontmatter key — see [Editing](#editing).
+To add another deck, drop a new `Slidev_your-deck.md` at the repo root and run
+`pnpm dev Slidev_your-deck.md`. It runs immediately, but is **gitignored by default** — opt it
+in if you want it committed ([details below](#tracking-a-new-deck)). Split sections out into
+`pages/` and pull each in via the `src:` frontmatter key — see [Editing](#editing).
 
 ## Prerequisites
 
@@ -54,17 +45,17 @@ the `src:` frontmatter key — see [Editing](#editing).
 Every command takes an optional deck filename. Omit it to act on `slides.md`.
 
 ```bash
-pnpm dev [file.md]                          # live deck at localhost:3030, hot reload
-pnpm build [file.md]                        # static SPA in dist/
-pnpm build Slidev_nodejs.md --base /nodejs/ # sub-path hosting
-pnpm export [file.md]                       # PDF (also --format pptx | png)
+pnpm dev [file.md]                            # live deck at localhost:3030, hot reload
+pnpm build [file.md]                          # static SPA in dist/
+pnpm build Slidev_tutorial.md --base /tutorial/  # sub-path hosting
+pnpm export [file.md]                         # PDF (also --format pptx | png)
 ```
 
 Examples:
 
 ```bash
 pnpm dev Slidev_tutorial.md     # serve the tutorial deck
-pnpm build Slidev_nodejs.md     # build the Node.js deck to dist/
+pnpm build Slidev_tutorial.md   # build the tutorial deck to dist/
 pnpm export Slidev_tutorial.md  # export the tutorial deck to PDF
 ```
 
@@ -97,14 +88,72 @@ The look is driven by CSS variables in `styles/tutorial.css` (`--deck-accent`, `
 ## Project structure
 
 ```
-slides.md              The deck — headmatter, cover, and slides (Slidev's default entry)
-pages/
-  example.md           Example of a section split into its own file, pulled in via src:
+.gitignore              Whitelist — tracks only the items below (see "What gets committed")
+package.json            Workspace + scripts (dev / build / export)
+pnpm-lock.yaml
+pnpm-workspace.yaml
 
 components/             Custom Vue components — auto-imported (Callout, FeatureCard, Chips, KeyCap…)
-layouts/               Custom layouts — section (divider), multicolumns (dense reference)
-styles/                Global design tokens and cross-slide tweaks
+layouts/                Custom layouts — section (divider), multicolumns (dense reference)
+styles/                 Global design tokens (--deck-*) and cross-slide tweaks
+
+slides.md               Template demo deck (default entry) — exercises every toolkit piece
+pages/example.md        The section slides.md imports via src:
+Slidev_tutorial.md      Beginner-to-advanced Slidev guide — a worked example of the toolkit
+pages/tutorial/         Its section files (01-beginner … 04-toolkit)
 ```
+
+Present on disk but **gitignored** (not committed): any other `Slidev_*.md` deck, its
+`pages/<name>/` sections and `public/<name>/` assets, plus `node_modules/`, `dist*/`, and
+`.claude/` (the authoring skill).
+
+## What gets committed (the whitelist)
+
+`.gitignore` ignores **everything** by default, then re-includes only the toolkit, the two
+reference decks, and the config. The mechanism is a whitelist:
+
+```gitignore
+/*                       # ignore every top-level entry...
+!/components/            # ...then re-include the toolkit folders...
+!/layouts/
+!/styles/
+!/.gitignore             # ...the config + reference decks...
+!/package.json
+!/pnpm-lock.yaml
+!/pnpm-workspace.yaml
+!/README.md
+!/slides.md
+!/Slidev_tutorial.md
+!/pages/                 # ...and selected content under pages/:
+/pages/*                 #    ignore everything in pages/...
+!/pages/example.md       #    ...except the demo section...
+!/pages/tutorial/        #    ...and the tutorial deck's sections.
+```
+
+Anything you add whose name isn't on that list — a new deck, an asset folder, a scratch file — is
+ignored automatically, now and in the future. This keeps the repo a clean toolkit even while you
+draft decks alongside it.
+
+### Tracking a new deck
+
+A new deck runs the moment you create it, but `git status` won't see it until you whitelist it.
+To commit `Slidev_AAA.md` along with its sections and assets, **append** these lines to the end
+of `.gitignore` (order matters — a re-include must come *after* the `/*` and `/dir/*` rules that
+ignore it):
+
+```gitignore
+!/Slidev_AAA.md
+!/pages/AAA/
+!/public/                # re-include public/ so git descends into it...
+/public/*                #   ...ignore everything in it...
+!/public/AAA/            #   ...except this deck's assets.
+```
+
+The `!dir/` → `/dir/*` → `!/dir/keep/` three-step is needed whenever you keep one subfolder out
+of an otherwise-ignored directory — git won't re-include a file unless its parent dir is
+re-included first. The `!/public/` + `/public/*` pair is only needed the first time; later decks
+just add their own `!/public/BBB/`. (`pages/` already has this pair, so a new deck there needs
+only `!/pages/AAA/`.)
 
 ## Editing
 
@@ -119,6 +168,17 @@ src: ./pages/your-section.md
 ```
 
 Drop new layouts in `layouts/` and new components in `components/` — both are auto-imported.
+
+### Japanese (CJK) fonts
+
+For a Japanese deck, set platform CJK fonts in the deck's headmatter so text renders crisply:
+
+```yaml
+fonts:
+  sans: "Hiragino Kaku Gothic ProN, Yu Gothic, sans-serif"
+  serif: "Hiragino Mincho ProN, Yu Mincho, serif"
+  local: "Hiragino Kaku Gothic ProN, Yu Gothic, Hiragino Mincho ProN, Yu Mincho"
+```
 
 ## Convert an existing Markdown file into a deck
 
@@ -146,6 +206,11 @@ Slidev_AAA.md           new root deck — run it with `pnpm dev Slidev_AAA.md`
 pages/AAA/01-….md       section files pulled in via src:
 public/AAA/…            assets, mirroring source folders, referenced as /AAA/… in slides
 ```
+
+Converted decks are **gitignored by default** — whitelist them as shown in
+[Tracking a new deck](#tracking-a-new-deck) if you want them committed. The skill itself lives
+under `.claude/`, which is also gitignored, so it's available locally but doesn't ship with a
+clone.
 
 ## Reusing this toolkit elsewhere
 

@@ -19,13 +19,15 @@
 !/pnpm-workspace.yaml
 !/README.md
 !/slides.md
+!/Slidev_tutorial.md
 
-# One file out of pages/ — the demo section slides.md imports via src:.
-# Re-include the dir (so git descends), ignore its contents, then keep
-# just this one file. Everything else under pages/ stays ignored.
+# Selected content out of pages/ — re-include the dir (so git descends),
+# ignore its contents, then keep just the demo section and the tutorial
+# deck's sections. Everything else under pages/ stays ignored.
 !/pages/
 /pages/*
 !/pages/example.md
+!/pages/tutorial/
 
 # Junk to keep out even inside the tracked folders above.
 .DS_Store
