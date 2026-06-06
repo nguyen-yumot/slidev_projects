@@ -1,0 +1,10 @@
+{
+  "name": "deck-variant-glass",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Glassmorphism look for the deck toolkit — a palette-only Slidev addon. List it after `core` in a deck's `addons:`.",
+  "engines": {
+    "slidev": ">=52"
+  }
+}

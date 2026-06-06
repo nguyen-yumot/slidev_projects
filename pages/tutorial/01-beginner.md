@@ -226,7 +226,7 @@ content here
 
 ---
 layout: image-right
-image: /images/layout-demo.svg
+image: /tutorial/slidev-logo.png
 ---
 
 # Picture beside content
@@ -236,7 +236,7 @@ The `image-right` layout puts an image on one side and your words on the other. 
 ```md
 ---
 layout: image-right
-image: /images/cover.png
+image: /tutorial/slidev-logo.png
 ---
 ```
 

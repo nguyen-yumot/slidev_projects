@@ -1,8 +1,10 @@
 # Slidev deck toolkit
 
 A [Slidev](https://sli.dev) workspace with a small, reusable component toolkit baked in. The
-`components/`, `layouts/`, and `styles/` folders are auto-imported at the project level, so they
-apply to any deck you add to the repo. Two reference decks ship with it: `slides.md` walks through
+toolkit is a shared **`core/`** (components, layouts, structural styles + the default *flat*
+palette) plus look **variants** under `variants/` (e.g. `glass`); a deck opts in through its
+`addons:` frontmatter and switches looks by changing that one line — see
+[Looks](#looks-flat-vs-glass). Two reference decks ship with it: `slides.md` walks through
 every toolkit piece, and `Slidev_tutorial.md` is a beginner-to-advanced guide to Slidev itself.
 
 The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the
@@ -31,9 +33,12 @@ Any `.md` file at the repo root is a runnable deck. Two are tracked in the repo:
 | `Slidev_tutorial.md` | Beginner-to-advanced guide to Slidev itself | `pnpm dev Slidev_tutorial.md` |
 
 To add another deck, drop a new `Slidev_your-deck.md` at the repo root and run
-`pnpm dev Slidev_your-deck.md`. It runs immediately, but is **gitignored by default** — opt it
-in if you want it committed ([details below](#tracking-a-new-deck)). Split sections out into
-`pages/` and pull each in via the `src:` frontmatter key — see [Editing](#editing).
+`pnpm dev Slidev_your-deck.md`. In its headmatter set `theme: default` and
+`addons: ['@/core', '@/variants/glass']` (or `['@/core']` for the flat look) — **without an
+`addons:` line the deck gets no toolkit** (no components, no styling). It runs immediately, but
+is **gitignored by default** — opt it in if you want it committed
+([details below](#tracking-a-new-deck)). Split sections out into `pages/` and pull each in via
+the `src:` frontmatter key — see [Editing](#editing).
 
 ## Prerequisites
 
@@ -86,8 +91,30 @@ Layouts (set per slide via `layout:`):
 - **`multicolumns`** — up to four named columns (`#col1`–`#col4`); the grid width adapts to how
   many slots you fill.
 
-The look is driven by CSS variables in `styles/tutorial.css` (`--deck-accent`, `--deck-tip`,
-`--deck-warning`, `--deck-note`, `--deck-try`, `--deck-radius`). Override any of them in `styles/`.
+The look is driven by `--deck-*` CSS variables defined in a **palette** file —
+`core/styles/palette-flat.css` (the flat default) or `variants/glass/styles/palette-glass.css`
+(glass). The shared structural rules live in `core/styles/base.css`. To re-skin, switch the
+palette via `addons:` (below) rather than editing components.
+
+## Looks (flat vs glass)
+
+The toolkit ships one shared **core** and one or more **look variants**, wired as Slidev local
+addons. A deck picks its look in frontmatter — change the one line to reskin the whole deck:
+
+```yaml
+theme: default
+addons: ['@/core']                    # flat (the default look — teal, opaque, system fonts)
+addons: ['@/core', '@/variants/glass'] # glass (translucent, blur, web fonts, ocean section)
+```
+
+- **List `'@/core'` first**, then a variant after it — the variant overrides core's default
+  palette tokens. Use the `@/` prefix (resolves to the project root); a `./core` path resolves
+  one level too high and fails.
+- **Core is shared and never duplicated** — fixing a component or adding a feature in `core/`
+  applies to every look at once.
+- **Add a new look** = add `variants/<name>/`: copy a palette file (e.g. `palette-flat.css`),
+  change the values, add a 2-line `styles/index.ts` and a minimal `package.json`, then
+  `addons: ['@/core', '@/variants/<name>']`.
 
 ## Project structure
 
@@ -97,9 +124,12 @@ package.json            Workspace + scripts (dev / build / export)
 pnpm-lock.yaml
 pnpm-workspace.yaml
 
-components/             Custom Vue components — auto-imported (Callout, FeatureCard, Chips, KeyCap…)
-layouts/                Custom layouts — section (divider), multicolumns (dense reference)
-styles/                 Global design tokens (--deck-*) and cross-slide tweaks
+core/                   Shared toolkit addon (loaded by every deck via addons:)
+  components/           Custom Vue components (Callout, FeatureCard, Chips, KeyCap, Tex…)
+  layouts/              Custom layouts — section (divider), multicolumns (dense reference)
+  styles/               base.css (structural) + palette-flat.css (default look) + index.ts
+variants/               Look variants — palette-only addons
+  glass/                Glassmorphism palette (styles/palette-glass.css)
 
 slides.md               Template demo deck (default entry) — exercises every toolkit piece
 pages/example.md        The section slides.md imports via src:
@@ -118,9 +148,8 @@ reference decks, and the config. The mechanism is a whitelist:
 
 ```gitignore
 /*                       # ignore every top-level entry...
-!/components/            # ...then re-include the toolkit folders...
-!/layouts/
-!/styles/
+!/core/                  # ...then re-include the toolkit (shared core + look variants)...
+!/variants/
 !/.gitignore             # ...the config + reference decks...
 !/package.json
 !/pnpm-lock.yaml
@@ -171,7 +200,8 @@ src: ./pages/your-section.md
 ---
 ```
 
-Drop new layouts in `layouts/` and new components in `components/` — both are auto-imported.
+Drop new layouts in `core/layouts/` and new components in `core/components/` — both are
+auto-imported from the `core` addon.
 
 ### Japanese (CJK) fonts
 
@@ -192,7 +222,8 @@ like this, swapping in your filename:
 
 ```text
 Convert AAA.md into a Slidev deck using this repo's toolkit and conventions:
-- create Slidev_AAA.md at the repo root (headmatter + cover + one src: block per section)
+- create Slidev_AAA.md at the repo root (headmatter with `theme: default` +
+  `addons: ['@/core', '@/variants/glass']`, then cover + one src: block per section)
 - split the sections into pages/AAA/01-….md, 02-….md, …
 - copy any images/assets under public/AAA/, mirroring their original subfolder structure
   (so files in different source folders never collide), and reference each from the web
@@ -223,27 +254,31 @@ to be portable. Three ways to reuse them, in order of effort.
 
 ### Option 1 — Copy the folders (fastest)
 
-Drop the three folders into a fresh Slidev project. Slidev auto-imports all of them.
+Copy the `core/` folder (and any `variants/` you want) into a fresh Slidev project, then point
+your deck at them with `addons:`.
 
 ```bash
 # 1. scaffold a new deck
 pnpm create slidev my-talk
 cd my-talk
 
-# 2. copy the portable folders from this repo
-cp -R /path/to/this-repo/components ./components
-cp -R /path/to/this-repo/layouts    ./layouts
-cp -R /path/to/this-repo/styles     ./styles
+# 2. copy the toolkit from this repo
+cp -R /path/to/this-repo/core     ./core
+cp -R /path/to/this-repo/variants ./variants
 
-# 3. install and run
+# 3. the <Tex> component renders with KaTeX
+pnpm add katex
+
+# 4. install and run
 pnpm install
 pnpm dev
 ```
 
-In the new deck's headmatter, add the keys the toolkit expects, then use the components straight
-away:
+In the new deck's headmatter, load the toolkit and set the keys it expects:
 
 ```yaml
+theme: default
+addons: ['@/core', '@/variants/glass']  # or ['@/core'] for the flat look
 mdc: true
 transition: slide-left
 lineNumbers: true
@@ -265,14 +300,16 @@ Best when you want every new deck to start identical.
 
 ### Option 3 — Publish as a Slidev addon
 
-The canonical path. One package, many decks — see the addon-based sibling of this repo, or
-[sli.dev/guide/write-addon](https://sli.dev/guide/write-addon). Move `components/`, `layouts/`,
-and `styles/` into a package with a `slidev.defaults` block, then opt in from any deck's
-headmatter:
+This repo already uses the addon model **locally** — `core/` and each `variants/*` are Slidev
+addons, referenced by path (`@/core`). To share them across repos, publish each as an npm
+package (`slidev-addon-…`) with a `slidev.defaults` block — see
+[sli.dev/guide/write-addon](https://sli.dev/guide/write-addon) — then opt in by name from any
+deck's headmatter:
 
 ```yaml
 addons:
-  - your-addon-name
+  - your-core-addon
+  - your-glass-addon
 ```
 
 **Where to start:** Option 1 for your next deck. If you reach for the same pieces a third time,

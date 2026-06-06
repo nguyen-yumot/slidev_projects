@@ -1,0 +1,13 @@
+{
+  "name": "deck-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared Slidev toolkit: components, layouts, structural styles, and the default (flat) palette. Used as a local addon — list it first in a deck's `addons:`.",
+  "engines": {
+    "slidev": ">=52"
+  },
+  "dependencies": {
+    "katex": "0.16.47"
+  }
+}

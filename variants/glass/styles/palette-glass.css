@@ -1,6 +1,9 @@
-/* Slidev deck — design tokens & cross-slide refinements.
-   Loaded automatically via styles/index.ts.
-   See plans/beautify-the-customized-slidev-splendid-falcon.md for the rationale. */
+/* palette-glass — the glassmorphism look (an override variant).
+
+   Loaded as `addons: [./core, ./variants/glass]` (after core), so these values
+   override core/styles/palette-flat.css. Translucent glass surfaces, backdrop
+   blur, layered ocean-tinted shadows, gradient borders, web fonts (Fraunces /
+   Inter Tight / JetBrains Mono), and an ocean-blue section divider. */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -66,11 +69,16 @@
   --deck-blur:    14px;
   --deck-blur-lg: 28px;
 
-  /* Layout vars (extracted from layouts) */
+  /* Layout vars */
   --deck-section-max:    72%;
   --deck-section-pad:    3.5rem;
   --deck-multicol-pad-y: 2.2rem;
   --deck-multicol-pad-x: 3rem;
+
+  /* Section divider gradient stops (deep sea → open ocean) */
+  --deck-section-from: #082f49;
+  --deck-section-via:  #0c4a6e;
+  --deck-section-to:   #0284c7;
 
   /* Fonts */
   --deck-font-display: 'Fraunces', 'Inter Tight', ui-serif, Georgia, serif;
@@ -112,167 +120,16 @@
   --deck-shadow-md:    0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
   --deck-shadow-lg:    0 32px 72px -20px rgba(0, 0, 0, 0.65), 0 12px 28px rgba(0, 0, 0, 0.5);
   --deck-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
 
-/* ---------- Base typography & surface ---------- */
-.slidev-layout {
-  font-family: var(--deck-font-body);
-  color: var(--deck-text);
-  background: var(--deck-bg);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
-}
-
-.slidev-layout h1,
-.slidev-layout h2 {
-  color: var(--deck-text-strong);
-  letter-spacing: -0.01em;
-}
-.slidev-layout h1 {
-  font-family: var(--deck-font-display);
-  font-weight: 700;
-  font-size: 2.1rem;
-  line-height: 1.15;
-}
-.slidev-layout h2 {
-  font-family: var(--deck-font-body);
-  font-weight: 700;
-  font-size: 1.55rem;
-  line-height: 1.25;
-}
-.slidev-layout h3 {
-  font-family: var(--deck-font-body);
-  font-weight: 600;
-  font-size: 1.15rem;
-  line-height: 1.35;
-  color: var(--deck-text-strong);
-}
-
-.slidev-layout p,
-.slidev-layout li {
-  font-size: 1rem;
-  line-height: 1.65;
-}
-
-/* Lists — comfortable reading rhythm, accent bullets */
-.slidev-layout ul,
-.slidev-layout ol {
-  line-height: 1.7;
-}
-.slidev-layout ul ::marker,
-.slidev-layout ol ::marker {
-  color: var(--deck-accent);
-}
-
-/* Links — accent + interactive states */
-.slidev-layout a {
-  color: var(--deck-accent);
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1.5px;
-  transition: color 0.15s ease;
-}
-.slidev-layout a:hover {
-  color: var(--deck-accent-deep);
-}
-.slidev-layout a:focus-visible {
-  outline: 2px solid var(--deck-accent);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-/* Code blocks — soft surface with inset highlight */
-.slidev-layout pre,
-.slidev-layout .shiki {
-  border-radius: var(--deck-radius-md);
-  padding: 1rem 1.15rem;
-  background: var(--deck-surface-2);
-  box-shadow: var(--deck-shadow-sm), var(--deck-shadow-inset);
-  border: 1px solid var(--deck-border);
-  font-family: var(--deck-font-mono);
-}
-
-/* Inline code — glass-tint pill */
-.slidev-layout :not(pre) > code {
-  background: var(--deck-glass-tint);
-  border: 1px solid var(--deck-border);
-  padding: 0.1em 0.4em;
-  border-radius: var(--deck-radius-sm);
-  font-family: var(--deck-font-mono);
-  font-size: 0.88em;
-}
-
-/* Blockquote — quiet accent rail */
-.slidev-layout blockquote {
-  border-left: 3px solid var(--deck-accent);
-  background: var(--deck-glass-tint);
-  padding: 0.6rem 1rem;
-  border-radius: 0 var(--deck-radius) var(--deck-radius) 0;
-  font-style: italic;
-  color: var(--deck-text-muted);
-  margin: 0.8rem 0;
-}
-.slidev-layout blockquote p { margin: 0.2rem 0; }
-
-/* Selection + scrollbar polish */
-::selection {
-  background: var(--deck-accent-soft);
-  color: var(--deck-text-strong);
-}
-.slidev-layout *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.slidev-layout *::-webkit-scrollbar-thumb {
-  background: var(--deck-border-strong);
-  border-radius: 999px;
-}
-.slidev-layout *::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* ---------- Reusable accent eyebrow ----------
-   Global rule because slides.md uses `<div class="deck-eyebrow">` directly,
-   and layouts/section.vue overrides it via :deep(.deck-eyebrow). */
-.deck-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--deck-text-muted);
-  font-family: var(--deck-font-body);
-}
-.deck-eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 2px;
-  background: linear-gradient(135deg, var(--deck-accent), var(--deck-try));
-  flex-shrink: 0;
-}
-
-/* ---------- Monospace pill (global form for raw .md usage) ----------
-   Direct-class form: <div class="deck-chip">…</div>. The scoped style in
-   Chip.vue mirrors these rules. */
-.deck-chip {
-  display: inline-block;
-  padding: 0.35rem 0.55rem;
-  border-radius: var(--deck-radius-sm);
-  background: var(--deck-glass-tint);
-  border: 1px solid var(--deck-border);
-  box-shadow: var(--deck-shadow-inset);
-  font-family: var(--deck-font-mono);
-  font-size: 0.85em;
-  line-height: 1.2;
-  color: var(--deck-text);
-  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
-  backdrop-filter: blur(var(--deck-blur-sm));
+  /* Section divider gradient — darker deep sea */
+  --deck-section-from: #020617;
+  --deck-section-via:  #082f49;
+  --deck-section-to:   #075985;
 }
 
 /* ---------- Backdrop-filter fallback (PDF export, older renderers) ----------
    When backdrop-filter is unsupported, swap glass surfaces to opaque so nothing
-   disappears against the page background. */
+   disappears against the page background. Must come after the glass tokens above. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
     --deck-glass: var(--deck-surface);

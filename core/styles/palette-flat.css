@@ -1,0 +1,127 @@
+/* palette-flat — the DEFAULT look baked into the core.
+
+   A flat, teal-accented palette: opaque surfaces (no glass), no blur, subtle
+   shadows, solid borders, system fonts. A deck gets this automatically with
+   `addons: [./core]`. A variant addon (e.g. variants/glass) loaded AFTER core
+   overrides these values to produce a different look. Defines the full --deck-*
+   token set so the toolkit is never tokenless. */
+
+/* ---------- Light tokens ---------- */
+:root {
+  /* Accent — teal */
+  --deck-accent:        #2b90b6;
+  --deck-accent-deep:   #1e6e8c;
+  --deck-accent-soft:   color-mix(in srgb, var(--deck-accent) 14%, #ffffff);
+  --deck-accent-glow:   color-mix(in srgb, var(--deck-accent) 32%, transparent);
+
+  /* Semantic alert colors */
+  --deck-tip:     #0ea672;
+  --deck-warning: #d98410;
+  --deck-note:    #5b6ee0;
+  --deck-try:     #8b5cf6;
+  --deck-pos:     #16a34a;   /* green-600 — yes / correct / allowed */
+  --deck-neg:     #dc2626;   /* red-600 — no / wrong / not allowed */
+
+  /* Surfaces — flat & opaque (no glass) */
+  --deck-bg:         #ffffff;
+  --deck-surface:    #ffffff;
+  --deck-surface-2:  #f1f5f9;
+  --deck-glass:      #ffffff;
+  --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 8%, transparent);
+
+  /* Borders — solid (gradient flattened to a solid accent tint) */
+  --deck-border:        rgba(15, 23, 42, 0.12);
+  --deck-border-strong: rgba(15, 23, 42, 0.18);
+  --deck-border-grad:   color-mix(in srgb, var(--deck-accent) 30%, transparent);
+
+  /* Text */
+  --deck-text:        #0f172a;
+  --deck-text-strong: #020617;
+  --deck-text-muted:  #475569;
+  --deck-text-faint:  #94a3b8;
+
+  /* Radii — softer 10px base */
+  --deck-radius-sm: 6px;
+  --deck-radius:    10px;
+  --deck-radius-md: 14px;
+  --deck-radius-lg: 18px;
+  --deck-radius-xl: 24px;
+
+  /* Spacing scale */
+  --deck-space-1: 0.25rem;
+  --deck-space-2: 0.5rem;
+  --deck-space-3: 0.75rem;
+  --deck-space-4: 1rem;
+  --deck-space-5: 1.5rem;
+  --deck-space-6: 2rem;
+  --deck-space-7: 3rem;
+
+  /* Shadows — subtle so FeatureCard elevation still reads, but no glassy depth */
+  --deck-shadow-sm:    0 1px 2px rgba(15, 23, 42, 0.05);
+  --deck-shadow:       0 1px 3px rgba(15, 23, 42, 0.06);
+  --deck-shadow-md:    0 2px 6px rgba(15, 23, 42, 0.07);
+  --deck-shadow-lg:    0 6px 16px rgba(15, 23, 42, 0.10);
+  --deck-shadow-inset: none;
+
+  /* Blur — disabled (flat) */
+  --deck-blur-sm: 0px;
+  --deck-blur:    0px;
+  --deck-blur-lg: 0px;
+
+  /* Layout vars */
+  --deck-section-max:    72%;
+  --deck-section-pad:    3.5rem;
+  --deck-multicol-pad-y: 2.2rem;
+  --deck-multicol-pad-x: 3rem;
+
+  /* Section divider gradient stops (teal, driven from the accent) */
+  --deck-section-from: color-mix(in srgb, var(--deck-accent-deep) 75%, #000);
+  --deck-section-via:  var(--deck-accent-deep);
+  --deck-section-to:   var(--deck-accent);
+
+  /* Fonts — system stacks (no web-font dependency) */
+  --deck-font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-body:    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-mono:    ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ---------- Dark tokens — flat teal night ---------- */
+.dark {
+  --deck-accent:        #5ab4d6;
+  --deck-accent-deep:   #8fcfe6;
+  --deck-accent-soft:   color-mix(in srgb, var(--deck-accent) 18%, transparent);
+  --deck-accent-glow:   color-mix(in srgb, var(--deck-accent) 40%, transparent);
+
+  --deck-tip:     #34d399;
+  --deck-warning: #fbbf24;
+  --deck-note:    #818cf8;
+  --deck-try:     #a78bfa;
+  --deck-pos:     #4ade80;
+  --deck-neg:     #f87171;
+
+  --deck-bg:         #0d1622;
+  --deck-surface:    #0d1623;
+  --deck-surface-2:  #14202f;
+  --deck-glass:      #0d1623;
+  --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 10%, transparent);
+
+  --deck-border:        rgba(255, 255, 255, 0.10);
+  --deck-border-strong: rgba(255, 255, 255, 0.18);
+  --deck-border-grad:   color-mix(in srgb, var(--deck-accent) 38%, transparent);
+
+  --deck-text:        #e5e7eb;
+  --deck-text-strong: #f8fafc;
+  --deck-text-muted:  #94a3b8;
+  --deck-text-faint:  #64748b;
+
+  --deck-shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.4);
+  --deck-shadow:       0 2px 6px rgba(0, 0, 0, 0.45);
+  --deck-shadow-md:    0 3px 10px rgba(0, 0, 0, 0.5);
+  --deck-shadow-lg:    0 8px 20px rgba(0, 0, 0, 0.55);
+  --deck-shadow-inset: none;
+
+  /* Section divider gradient — explicit dark teal (accent tokens go light here) */
+  --deck-section-from: #04141c;
+  --deck-section-via:  #0c3a4a;
+  --deck-section-to:   #155f78;
+}

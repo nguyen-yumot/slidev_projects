@@ -1,5 +1,6 @@
 ---
 theme: default
+addons: ['@/core', '@/variants/glass']
 title: Slidev Deck Template
 info: |
   A Slidev starter with a portable component toolkit.

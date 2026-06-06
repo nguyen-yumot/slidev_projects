@@ -27,8 +27,8 @@
     radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.20), transparent 50%),
     /* Accent glow */
     radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
-    /* Base diagonal — deep sea to open ocean */
-    linear-gradient(135deg, #082f49 0%, #0c4a6e 45%, #0284c7 100%);
+    /* Base diagonal — driven by the palette's --deck-section-* tokens */
+    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
   background-blend-mode: overlay, normal, normal, normal;
   position: relative;
 }
@@ -38,7 +38,7 @@
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>"),
     radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.10), transparent 50%),
     radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
-    linear-gradient(135deg, #020617 0%, #082f49 45%, #075985 100%);
+    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
   background-blend-mode: overlay, normal, normal, normal;
 }
 

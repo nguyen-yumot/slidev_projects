@@ -223,15 +223,17 @@ The component name is the icon set plus the icon, like `carbon-rocket`.
 
 ---
 layout: image-right
-image: /images/layout-demo.svg
+image: /tutorial/layout-demo.svg
 ---
 
 # Images and media
 
-Keep image files in the `public/` folder and reference them from `/`:
+Keep image files in the `public/` folder and reference them from `/`. 
+
+Do not include "/public" in the reference although `public` is its parent folder.
 
 ```md
-![A diagram](/images/layout-demo.svg)
+![A diagram](/tutorial/slidev-logo.png)
 ```
 
 For a full-slide backdrop, set the `background:` key in a slide's frontmatter.

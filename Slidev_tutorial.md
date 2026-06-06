@@ -1,5 +1,6 @@
 ---
 theme: default
+addons: ['@/core', '@/variants/glass']
 title: Slidev Tutorial — Beginner to Advanced
 titleTemplate: '%s · Slidev Tutorial'
 info: |

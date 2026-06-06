@@ -7,10 +7,9 @@
 # Ignore every top-level entry...
 /*
 
-# ...re-include the toolkit folders...
-!/components/
-!/layouts/
-!/styles/
+# ...re-include the toolkit: the shared core + the look variants...
+!/core/
+!/variants/
 
 # ...and these root files only.
 !/.gitignore
@@ -28,6 +27,15 @@
 /pages/*
 !/pages/example.md
 !/pages/tutorial/
+
+# ...and two demo assets out of public/ (same three-step, then pick the files).
+# Everything else under public/ — other decks' images — stays ignored.
+!/public/
+/public/*
+!/public/tutorial/
+/public/tutorial/*
+!/public/tutorial/layout-demo.svg
+!/public/tutorial/slidev-logo.png
 
 # Junk to keep out even inside the tracked folders above.
 .DS_Store
