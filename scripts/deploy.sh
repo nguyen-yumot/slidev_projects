@@ -5,35 +5,28 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."          # always run from the repo root
 
-# ── Decks to publish. One per line: the deck filename at the repo root, with an
-#    OPTIONAL custom card title after a "|". Without "|Title", the title is derived
-#    from the filename (Slidev_my-talk.md → "My talk").
-#      Slidev_stats.md                 → card titled "Stats"
-#      Slidev_stats.md|Statistics 101  → card titled "Statistics 101"
-#    (The URL is always /<filename>/ — a custom title changes only the displayed text.)
-#    Quote each entry so the "|" is treated as text, not a shell pipe.
+# ── Decks to publish. One filename per line (at the repo root). Each deck's card title
+#    and PDF filename come from the deck's own front-matter `title` (→ first `# H1` →
+#    filename), resolved by core/setup/deck-name.mjs — the same name `pnpm dev` exports.
+#    The URL is always /<name>/, where <name> is the filename minus `Slidev_` and `.md`.
 DECKS=(
-  "Slidev_tutorial.md|Getting Started with Slidev"
-  "Slidev_statistics.md|Statistics for Researchers"
+  "Slidev_tutorial.md"
+  "Slidev_statistics.md"
 )
 
-# Split a DECKS entry into globals DECK_FILE / DECK_NAME / DECK_TITLE.
-# DECK_TITLE is HTML-escaped so titles may contain & < > safely.
+# Split a DECKS entry into globals DECK_FILE (the deck path) and DECK_NAME (its URL
+# segment: the filename minus the `Slidev_` prefix and `.md`). The card title / PDF name
+# is the deck's front-matter `title`, resolved per-deck in the build loop below.
 parse_deck() {
-  local entry=$1 custom t cap
-  DECK_FILE=${entry%%|*}                              # before the first "|"
-  custom=${entry#*|}; [ "$custom" = "$entry" ] && custom=""   # after it, if any
+  DECK_FILE=$1
   DECK_NAME=$(basename "$DECK_FILE" .md | sed 's/^Slidev_//')
-  if [ -n "$custom" ]; then
-    t=$custom                                         # custom title, used verbatim (may be Japanese, etc.)
-  else
-    t=$(printf '%s' "$DECK_NAME" | LC_ALL=C sed 's/[-_]/ /g')  # "my-talk" → "my talk"
-    cap=$(printf '%s' "${t:0:1}" | tr '[:lower:]' '[:upper:]')
-    t="$cap${t:1}"                                    # capitalize first letter (ASCII filenames)
-  fi
-  # LC_ALL=C → byte-wise escape, so multibyte titles (Japanese, etc.) pass through
-  # intact on any locale and never trip BSD sed's "illegal byte sequence".
-  DECK_TITLE=$(printf '%s' "$t" | LC_ALL=C sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+}
+
+# HTML-escape for safe use as element text AND inside a double-quoted attribute (" escaped).
+# LC_ALL=C → byte-wise escape so multibyte titles (Japanese, etc.) pass through intact on any
+# locale and never trip BSD sed's "illegal byte sequence".
+html_escape() {
+  printf '%s' "$1" | LC_ALL=C sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g'
 }
 
 # Owner + repo derived from the git remote — no edits needed after a fork/rename.
@@ -51,23 +44,65 @@ if [ "${#DECKS[@]}" -eq 0 ]; then
   exit 1
 fi
 
+# Each deck is rendered to a downloadable PDF (the in-deck Download button + the landing-page
+# PDF link) — both `slidev build --download` and scripts/export-pdf.mjs drive a headless
+# Chromium, which needs Slidev's optional playwright-chromium.
+if ! node -e "require.resolve('playwright-chromium/package.json')" >/dev/null 2>&1; then
+  echo "deploy.sh: playwright-chromium is required to export the deck PDFs." >&2
+  echo "  install it once:  pnpm add -D playwright-chromium && pnpm exec playwright install chromium" >&2
+  exit 1
+fi
+
 rm -rf dist                       # rebuild-all: start clean every run
 cards=""
 i=0
 for entry in "${DECKS[@]}"; do
   parse_deck "$entry"
   i=$((i + 1)); idx=$(printf '%02d' "$i")   # 01, 02, … ordinal for each card
-  echo "▶ building $DECK_FILE  →  dist/$DECK_NAME  (base /$REPO/$DECK_NAME/)"
-  pnpm exec slidev build "$DECK_FILE" --base "/$REPO/$DECK_NAME/" --out "dist/$DECK_NAME"
+  echo "▶ building $DECK_FILE  →  dist/$DECK_NAME  (base /$REPO/$DECK_NAME/) + PDF"
+  # The deck's front-matter `title` (→ first `# H1` → filename) is the single source of the
+  # name, resolved here and — via @/core's setup/preparser.ts — inside Slidev itself, so both
+  # sides agree on the PDF path. TITLE is the display title (card text, verbatim); PDF_FILE is
+  # the filesystem-safe form (--file collapses "/" so a "TCP/IP" title can't scatter the PDF
+  # into a subfolder), matching the exportFilename the preparser sets; PDF_HREF its URL-encoded
+  # link; DECK_TITLE / PDF_DOWNLOAD are the HTML-escaped display title and on-disk filename.
+  TITLE=$(node core/setup/deck-name.mjs "$DECK_FILE")
+  PDF_FILE="$(node core/setup/deck-name.mjs "$DECK_FILE" --file).pdf"
+  PDF_HREF=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$PDF_FILE")
+  DECK_TITLE=$(html_escape "$TITLE")
+  PDF_DOWNLOAD=$(html_escape "$PDF_FILE")
 
+  # Step 1 — build the static site + the in-deck "Download PDF" button (--download). The preparser
+  #   sets exportFilename, so the build writes the PDF as dist/<name>/<title>.pdf and the button
+  #   points there; its content is unreliable (truncated/blank — see step 2), so step 2 overwrites
+  #   that same file.
+  pnpm exec slidev build "$DECK_FILE" --base "/$REPO/$DECK_NAME/" --out "dist/$DECK_NAME" \
+    --download
+
+  # Step 2 — overwrite that PDF with one from Slidev's BROWSER exporter (the /export page you get
+  #   from `pnpm dev` → open /export → print), driven headlessly. Every CLI exporter path is broken
+  #   for the larger decks here: `slidev export` (dev) comes out BLANK, and `build --download` /
+  #   one-piece comes out TRUNCATED (89/101 of 106) because it stacks all slides into one giant
+  #   browser surface Chromium clips. `--per-slide` is correct but slow (~90-140s/deck). The browser
+  #   exporter lays out each slide as its own print block and uses the browser's native print
+  #   pagination (no surface limit) → complete + non-blank in a few seconds. Verify PDFs by file
+  #   size + rendered pixels, never page count (a blank PDF still has the right page count). No
+  #   --with-clicks: one page per slide at its final built state, matching the manual /export default.
+  node scripts/export-pdf.mjs "$DECK_FILE" "dist/$DECK_NAME/$PDF_FILE"
+
+  # Card = container div with two links: the deck (most of the row) and a small
+  # PDF pill. (A nested <a> inside an <a> is invalid, hence the two siblings.)
   cards="$cards
-      <a class=\"card\" href=\"./$DECK_NAME/\">
-        <span class=\"card-index\">$idx</span>
-        <span class=\"card-body\">
-          <span class=\"card-name\">$DECK_TITLE</span>
-          <span class=\"card-path\">/$DECK_NAME/</span>
-        </span>
-      </a>"
+      <div class=\"card\">
+        <a class=\"card-main\" href=\"./$DECK_NAME/\">
+          <span class=\"card-index\">$idx</span>
+          <span class=\"card-body\">
+            <span class=\"card-name\">$DECK_TITLE</span>
+            <span class=\"card-path\">/$DECK_NAME/</span>
+          </span>
+        </a>
+        <a class=\"card-pdf\" href=\"./$DECK_NAME/$PDF_HREF\" download=\"$PDF_DOWNLOAD\">PDF</a>
+      </div>"
 done
 
 count=${#DECKS[@]}
@@ -132,16 +167,20 @@ cat > dist/index.html <<EOF
   }
   .list { display: flex; flex-direction: column; gap: clamp(.55rem, 1.3vw, .85rem); }
   .card {
-    display: grid; grid-template-columns: auto 1fr; align-items: baseline;
-    gap: clamp(.85rem, 2.5vw, 1.5rem);
+    display: flex; align-items: stretch; gap: clamp(.6rem, 1.6vw, 1rem);
     padding: clamp(1rem, 2.4vw, 1.3rem) clamp(1.1rem, 2.6vw, 1.55rem);
     background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
-    text-decoration: none; color: inherit; box-shadow: var(--shadow);
+    box-shadow: var(--shadow);
     transition: transform .2s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, border-color .2s ease;
     animation: rise .55s cubic-bezier(.22,.61,.36,1) backwards;
   }
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--accent-line); }
-  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .card-main {
+    flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr;
+    align-items: baseline; gap: clamp(.85rem, 2.5vw, 1.5rem);
+    text-decoration: none; color: inherit;
+  }
+  .card-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
   .card-index {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-variant-numeric: tabular-nums; font-size: .78rem; font-weight: 600;
@@ -149,6 +188,15 @@ cat > dist/index.html <<EOF
     transition: color .2s ease;
   }
   .card:hover .card-index { color: var(--accent); }
+  .card-pdf {
+    flex: none; align-self: center;
+    padding: .4rem .8rem; border: 1px solid var(--line); border-radius: 9px;
+    font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .card-pdf:hover { color: var(--accent); border-color: var(--accent-line); background: var(--tint); }
+  .card-pdf:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .card-body { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
   .card-name {
     font-size: clamp(1.1rem, 2.6vw, 1.28rem); font-weight: 600;
@@ -188,6 +236,10 @@ cat > dist/index.html <<EOF
 EOF
 cp dist/index.html dist/404.html
 touch dist/.nojekyll
+# Empty .gitignore in the output: gh-pages (--dotfiles) copies it over the repo's
+# whitelist .gitignore in its publish work tree, so the built files are NOT ignored
+# when staged. Without this, only .gitignore lands on gh-pages and every URL 404s.
+printf '# published site — nothing ignored here\n' > dist/.gitignore
 find dist -name '.DS_Store' -delete 2>/dev/null || true   # don't publish macOS junk
 
 if [ "${1:-}" = "--no-publish" ]; then
@@ -205,7 +257,10 @@ if [ "${1:-}" = "--no-publish" ]; then
 fi
 
 echo "▶ publishing dist/ → gh-pages"
-pnpm exec gh-pages -d dist --dotfiles -b gh-pages
+# --no-history: replace the branch with a single fresh commit each deploy, so the
+# multi-MB exported PDFs don't pile up in branch history over time. (The published
+# site only needs the latest output; history on a generated branch has no value.)
+pnpm exec gh-pages -d dist --dotfiles --no-history -b gh-pages
 echo "✓ live (allow ~1 min on first deploy):"
 for entry in "${DECKS[@]}"; do
   parse_deck "$entry"

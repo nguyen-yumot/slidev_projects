@@ -2,7 +2,6 @@
 theme: default
 addons: ['@/core', '@/variants/glass']
 title: Slidev Tutorial — Beginner to Advanced
-titleTemplate: '%s · Slidev Tutorial'
 info: |
   ## Slidev Tutorial
   An interactive, beginner-to-advanced guide to Slidev — built with Slidev itself.

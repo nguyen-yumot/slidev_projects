@@ -37,11 +37,12 @@
 !/public/tutorial/layout-demo.svg
 !/public/tutorial/slidev-logo.png
 
-# The deploy script (tracked so anyone with the repo can publish); other
+# The deploy script + its helpers (tracked so anyone with the repo can publish); other
 # scripts (figure pipelines, scratch tools) stay ignored — same three-step.
 !/scripts/
 /scripts/*
 !/scripts/deploy.sh
+!/scripts/export-pdf.mjs
 
 # Junk to keep out even inside the tracked folders above.
 .DS_Store

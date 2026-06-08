@@ -78,10 +78,12 @@ order.
 [`scripts/deploy.sh`](scripts/deploy.sh) — add or remove deck filenames. Only the listed decks
 are published.
 
-**2. Install dependencies** (first time only):
+**2. Install dependencies** (first time only). The second command installs the browser that the
+deploy uses to export each deck to PDF (see [PDF downloads](#pdf-downloads-for-viewers)):
 
 ```bash
-pnpm install
+pnpm install                            # includes playwright-chromium (a tracked dev dependency)
+pnpm exec playwright install chromium   # one-time: the headless browser used for PDF export
 ```
 
 **3. Preview locally** (optional):
@@ -115,11 +117,26 @@ https://<owner>.github.io/<repo>/statistics/
 > **Public vs private.** Your `.md` source is never pushed, but a published deck's rendered slides
 > and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
 
+### PDF downloads for viewers
+
+Every published deck is exported to PDF at deploy time, so viewers can save a copy with no install
+and no browser fiddling. Each deck offers it two ways:
+
+- a **PDF** link beside the deck on the landing page, and
+- a **Download PDF** button inside the deck's own toolbar (bottom-left on hover).
+
+This needs the `playwright-chromium` browser from step 2; if it's missing, `pnpm deploy:pages`
+stops with instructions. PDF export adds time to each deploy (it renders every slide). The file
+is named after the deck's front-matter `title` (falling back to its first `# heading`, then the
+filename) — the same name you get from `pnpm dev` → `/export` and the in-deck Download button, so
+every path agrees. The `DECKS` list only *chooses* which decks to publish; it never sets titles.
+(Viewer-side `?print` is **not** used — it's unreliable under GitHub Pages' sub-path routing.)
+
 **How this works (background):**
 
 - **`scripts/deploy.sh`** lets a single command do everything publishing needs: build every deck
-  in the `DECKS` list, generate the landing page, and push only the compiled output to `gh-pages`.
-  Without it you would have to build and deploy each deck by hand.
+  in the `DECKS` list, export each to PDF, generate the landing page, and push only the compiled
+  output to `gh-pages`. Without it you would have to build and deploy each deck by hand.
 - **Image paths are fixed automatically.** On GitHub Pages each deck lives under a
   `/<repo>/<name>/` sub-path, but decks reference public images from the web root (e.g.
   `/statistics/chart.svg`). The toolkit (`core/global-bottom.vue`) rewrites those paths to include
