@@ -68,6 +68,64 @@ CLI export (`pnpm export`) needs Slidev's optional `playwright-chromium`, which 
 bundle — add it with `pnpm add -D playwright-chromium && pnpm exec playwright install chromium`.
 Without it, use the in-browser exporter at `localhost:3030/export`, which needs nothing extra.
 
+## Publish decks online (GitHub Pages)
+
+Publish your decks as links anyone can open — no install, no account. Only the compiled output
+is pushed to a `gh-pages` branch; your `.md` source stays on your machine. Follow these steps in
+order.
+
+**1. Choose which decks to publish.** Edit the `DECKS` list at the top of
+[`scripts/deploy.sh`](scripts/deploy.sh) — add or remove deck filenames. Only the listed decks
+are published.
+
+**2. Install dependencies** (first time only):
+
+```bash
+pnpm install
+```
+
+**3. Preview locally** (optional):
+
+```bash
+pnpm preview:pages
+npx serve .preview        # then open http://localhost:3000/<repo>/
+```
+
+**4. Publish** — builds the listed decks and pushes them to the `gh-pages` branch:
+
+```bash
+pnpm deploy:pages
+```
+
+**5. Turn on GitHub Pages** (first time only). On GitHub, open **Settings → Pages → Build and
+deployment → Source**, choose **"Deploy from a branch"**, then branch **`gh-pages`** and folder
+**`/ (root)`**, and Save.
+
+**6. Open your links.** After about a minute the decks are live (owner and repo are taken from
+your git remote; `pnpm deploy:pages` also prints the URLs):
+
+```
+https://<owner>.github.io/<repo>/             # landing page, links every deck
+https://<owner>.github.io/<repo>/tutorial/    # an individual deck
+https://<owner>.github.io/<repo>/statistics/
+```
+
+**To update later**, repeat steps 1 and 4 — step 5 is one-time.
+
+> **Public vs private.** Your `.md` source is never pushed, but a published deck's rendered slides
+> and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
+
+**How this works (background):**
+
+- **`scripts/deploy.sh`** lets a single command do everything publishing needs: build every deck
+  in the `DECKS` list, generate the landing page, and push only the compiled output to `gh-pages`.
+  Without it you would have to build and deploy each deck by hand.
+- **Image paths are fixed automatically.** On GitHub Pages each deck lives under a
+  `/<repo>/<name>/` sub-path, but decks reference public images from the web root (e.g.
+  `/statistics/chart.svg`). The toolkit (`core/global-bottom.vue`) rewrites those paths to include
+  the sub-path at runtime, so images that work in `pnpm dev` also work once published — no edits
+  needed.
+
 ## Toolkit reference
 
 Components are auto-imported — use them directly in any slide.
@@ -120,14 +178,16 @@ addons: ['@/core', '@/variants/glass'] # glass (translucent, blur, web fonts, oc
 
 ```
 .gitignore              Whitelist — tracks only the items below (see "What gets committed")
-package.json            Workspace + scripts (dev / build / export)
+package.json            Workspace + scripts (dev / build / export / preview:pages / deploy:pages)
 pnpm-lock.yaml
 pnpm-workspace.yaml
+scripts/deploy.sh       Build + publish the listed decks to GitHub Pages (pnpm deploy:pages)
 
 core/                   Shared toolkit addon (loaded by every deck via addons:)
   components/           Custom Vue components (Callout, FeatureCard, Chips, KeyCap, Tex…)
   layouts/              Custom layouts — section (divider), multicolumns (dense reference)
   styles/               base.css (structural) + palette-flat.css (default look) + index.ts
+  global-bottom.vue     Runtime base-path image fix (for sub-path hosting; see Publish)
 variants/               Look variants — palette-only addons
   glass/                Glassmorphism palette (styles/palette-glass.css)
 
@@ -138,8 +198,8 @@ pages/tutorial/         Its section files (01-beginner … 04-toolkit)
 ```
 
 Present on disk but **gitignored** (not committed): any other `Slidev_*.md` deck, its
-`pages/<name>/` sections and `public/<name>/` assets, plus `node_modules/`, `dist*/`, and
-`.claude/` (the authoring skill).
+`pages/<name>/` sections and `public/<name>/` assets, plus `node_modules/`, `dist/`, `.preview/`
+(the local preview staged by `pnpm preview:pages`), and `.claude/` (the authoring skill).
 
 ## What gets committed (the whitelist)
 
@@ -161,6 +221,9 @@ reference decks, and the config. The mechanism is a whitelist:
 /pages/*                 #    ignore everything in pages/...
 !/pages/example.md       #    ...except the demo section...
 !/pages/tutorial/        #    ...and the tutorial deck's sections.
+!/scripts/               # ...and the deploy script (other scripts stay ignored):
+/scripts/*
+!/scripts/deploy.sh
 ```
 
 Anything you add whose name isn't on that list — a new deck, an asset folder, a scratch file — is
