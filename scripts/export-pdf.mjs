@@ -88,6 +88,11 @@ async function main() {
     // A NORMAL viewport — the key difference from the CLI exporter. Native print pagination
     // (page.pdf) then handles any number of slides without the giant-surface clip.
     const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
+    // Render with PRINT media from the start: the palettes ship cheaper
+    // @media print token values (and print-only fonts), and page.pdf() prints
+    // with print media anyway — emulating it up front makes the font-ready
+    // wait below actually load the print fonts before we print.
+    await page.emulateMedia({ media: 'print' })
 
     const url = `http://${HOST}:${port}/export${withClicks ? '?print=clicks' : ''}`
     // NOT networkidle: a live <Youtube> iframe never lets it settle. We wait on concrete

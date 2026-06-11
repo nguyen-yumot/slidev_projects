@@ -1,0 +1,10 @@
+{
+  "name": "deck-variant-minimal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimalist fast-PDF look for the deck toolkit — flat's teal palette with every PDF-heavy effect stripped (no shadows, no backdrop-filter, opaque fills, solid section divider). List it after `core` in a deck's `addons:`.",
+  "engines": {
+    "slidev": ">=52"
+  }
+}

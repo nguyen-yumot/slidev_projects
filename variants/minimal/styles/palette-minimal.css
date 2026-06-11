@@ -1,0 +1,184 @@
+/* palette-minimal — flat's teal look with every PDF-heavy effect stripped.
+
+   Loaded as `addons: ['@/core', '@/variants/minimal']` (after core), so these
+   values override core/styles/palette-flat.css. Built for big decks whose
+   exported PDFs must open instantly in any viewer: no shadows, no
+   backdrop-filter, no blend modes, no gradients on the section divider, and
+   no alpha anywhere — every fill and border is a fully opaque colour, so the
+   PDF contains no transparency groups or soft masks. Visually it stays close
+   to the flat default: same teal accents, same shapes, just crisper.
+
+   Fonts are Lato + IBM Plex Mono (web fonts), NOT the system stack: on macOS
+   `ui-sans-serif` resolves to San Francisco — a variable font — and Chromium
+   embeds variable fonts in PDFs as Type 3 vector-procedure fonts, re-parsed
+   on every page. THAT (not effects) is the main reason big exported PDFs
+   render slowly. The families below are ones Google Fonts still serves as
+   STATIC files (Inter/Roboto/JetBrains Mono now come back variable, so they
+   would hit the same Type 3 path); static TrueType embeds as compact CID
+   subsets that viewers paint instantly. Lato ships 400/700 only — CSS weight
+   600 resolves to the real 700 face (no Type 3 synthetic bold). */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* ---------- Light tokens ---------- */
+:root {
+  /* Accent — teal (same as flat) */
+  --deck-accent:        #2b90b6;
+  --deck-accent-deep:   #1e6e8c;
+  --deck-accent-soft:   color-mix(in srgb, var(--deck-accent) 14%, #ffffff);
+  --deck-accent-glow:   color-mix(in srgb, var(--deck-accent) 32%, #ffffff);
+
+  /* Semantic alert colors (same solid hexes as flat) */
+  --deck-tip:     #0ea672;
+  --deck-warning: #d98410;
+  --deck-note:    #5b6ee0;
+  --deck-try:     #8b5cf6;
+  --deck-pos:     #16a34a;
+  --deck-neg:     #dc2626;
+
+  /* Surfaces — opaque, no alpha (glass-tint is the tint precomputed on white) */
+  --deck-bg:         #ffffff;
+  --deck-surface:    #ffffff;
+  --deck-surface-2:  #f1f5f9;
+  --deck-glass:      #ffffff;
+  --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 8%, #ffffff);
+
+  /* Borders — opaque hairlines (flat's rgba values mixed onto white) */
+  --deck-border:        color-mix(in srgb, #0f172a 12%, #ffffff);
+  --deck-border-strong: color-mix(in srgb, #0f172a 18%, #ffffff);
+  /* Consumed as an <image> (FeatureCard border layer, multicol bar) — keep
+     the gradient form, with both stops the same opaque colour. */
+  --deck-border-grad:   linear-gradient(
+    color-mix(in srgb, var(--deck-accent) 30%, #ffffff),
+    color-mix(in srgb, var(--deck-accent) 30%, #ffffff));
+
+  /* Text */
+  --deck-text:        #0f172a;
+  --deck-text-strong: #020617;
+  --deck-text-muted:  #475569;
+  --deck-text-faint:  #94a3b8;
+
+  /* Radii */
+  --deck-radius-sm: 6px;
+  --deck-radius:    10px;
+  --deck-radius-md: 14px;
+  --deck-radius-lg: 18px;
+  --deck-radius-xl: 24px;
+
+  /* Spacing scale */
+  --deck-space-1: 0.25rem;
+  --deck-space-2: 0.5rem;
+  --deck-space-3: 0.75rem;
+  --deck-space-4: 1rem;
+  --deck-space-5: 1.5rem;
+  --deck-space-6: 2rem;
+  --deck-space-7: 3rem;
+
+  /* Shadows — none at all (cards keep their borders for definition) */
+  --deck-shadow-sm:    none;
+  --deck-shadow:       none;
+  --deck-shadow-md:    none;
+  --deck-shadow-lg:    none;
+  --deck-shadow-inset: none;
+
+  /* Blur / backdrop — fully off (none, not blur(0), so nothing rasterizes) */
+  --deck-blur-sm: 0px;
+  --deck-blur:    0px;
+  --deck-blur-lg: 0px;
+  --deck-backdrop-sm: none;
+  --deck-backdrop:    none;
+
+  /* Section-divider decorations — solid instead of flat's alpha gradients
+     (each alpha gradient becomes a PostScript-function shading + soft mask in
+     the exported PDF). The per-component decoration tokens live further down,
+     on the component selectors — see the note there. */
+  --deck-section-bar:        var(--deck-section-fg);
+  --deck-section-eyebrow-dot: var(--deck-section-fg);
+
+  /* Layout vars */
+  --deck-section-max:    72%;
+  --deck-section-pad:    3.5rem;
+  --deck-multicol-pad-y: 2.2rem;
+  --deck-multicol-pad-x: 3rem;
+
+  /* Section divider — one solid deep-teal fill, no grain/gradients/blend */
+  --deck-section-from: #1e6e8c;
+  --deck-section-via:  #1e6e8c;
+  --deck-section-to:   #1e6e8c;
+  --deck-section-bg:    var(--deck-section-via);
+  --deck-section-blend: normal;
+  --deck-section-fg:    #ffffff;
+
+  /* Fonts — embeddable static web fonts (see header note; system SF would
+     force slow Type 3 embedding in exported PDFs) */
+  --deck-font-display: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-body:    'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ---------- Dark tokens — flat teal night, opaque ---------- */
+.dark {
+  --deck-accent:        #5ab4d6;
+  --deck-accent-deep:   #8fcfe6;
+  --deck-accent-soft:   color-mix(in srgb, var(--deck-accent) 18%, #0d1622);
+  --deck-accent-glow:   color-mix(in srgb, var(--deck-accent) 40%, #0d1622);
+
+  --deck-tip:     #34d399;
+  --deck-warning: #fbbf24;
+  --deck-note:    #818cf8;
+  --deck-try:     #a78bfa;
+  --deck-pos:     #4ade80;
+  --deck-neg:     #f87171;
+
+  --deck-bg:         #0d1622;
+  --deck-surface:    #0d1623;
+  --deck-surface-2:  #14202f;
+  --deck-glass:      #0d1623;
+  --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 10%, #0d1622);
+
+  --deck-border:        color-mix(in srgb, #ffffff 10%, #0d1622);
+  --deck-border-strong: color-mix(in srgb, #ffffff 18%, #0d1622);
+  --deck-border-grad:   linear-gradient(
+    color-mix(in srgb, var(--deck-accent) 38%, #0d1622),
+    color-mix(in srgb, var(--deck-accent) 38%, #0d1622));
+
+  --deck-text:        #e5e7eb;
+  --deck-text-strong: #f8fafc;
+  --deck-text-muted:  #94a3b8;
+  --deck-text-faint:  #64748b;
+
+  --deck-shadow-sm:    none;
+  --deck-shadow:       none;
+  --deck-shadow-md:    none;
+  --deck-shadow-lg:    none;
+  --deck-shadow-inset: none;
+
+  /* Section divider — solid dark teal */
+  --deck-section-from: #0c3a4a;
+  --deck-section-via:  #0c3a4a;
+  --deck-section-to:   #0c3a4a;
+  --deck-section-bg:    var(--deck-section-via);
+  --deck-section-blend: normal;
+  --deck-section-fg:    #ffffff;
+}
+
+/* Accent decorations — solid fills instead of core's alpha gradients, which
+   become PostScript-function shadings + soft masks in exported PDFs (measured
+   ~10ms+ per callout, per page view, in Apple Preview's renderer). Declared on
+   the component selectors (NOT :root) because the values reference --c, which
+   only exists on the component element; these win over core's defaults in
+   base.css because this addon loads after core. Works for light + dark: the
+   var() refs substitute per element. */
+.deck-callout {
+  --deck-callout-rail:       var(--c);
+  --deck-callout-rail-blank: var(--c);
+  --deck-callout-tile-bg:    color-mix(in srgb, var(--c) 14%, var(--deck-glass));
+}
+.deck-card {
+  /* Used in a layered `background` shorthand slot that needs an <image>, so a
+     bare color is invalid there — a same-color 2-stop gradient is the cheap
+     opaque equivalent. */
+  --deck-card-toned-border: linear-gradient(
+    color-mix(in srgb, var(--c) 40%, var(--deck-glass)),
+    color-mix(in srgb, var(--c) 40%, var(--deck-glass)));
+}

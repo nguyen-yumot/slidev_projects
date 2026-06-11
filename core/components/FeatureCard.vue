@@ -72,6 +72,9 @@ const styleVars = computed(() =>
 <style scoped>
 .deck-card {
   --c: var(--deck-accent);
+  /* --deck-card-fill (the inner fill layer) defaults in base.css — NOT here:
+     a scoped declaration would carry the [data-v] attribute and out-rank any
+     palette override of the token. */
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
@@ -79,10 +82,10 @@ const styleVars = computed(() =>
   border-radius: var(--deck-radius-lg);
   border: 1px solid transparent;
   background:
-    linear-gradient(var(--deck-glass), var(--deck-glass)) padding-box,
+    var(--deck-card-fill) padding-box,
     var(--deck-border-grad) border-box;
-  -webkit-backdrop-filter: blur(var(--deck-blur));
-  backdrop-filter: blur(var(--deck-blur));
+  -webkit-backdrop-filter: var(--deck-backdrop);
+  backdrop-filter: var(--deck-backdrop);
   color: var(--deck-text);
   height: 100%;
   position: relative;
@@ -96,10 +99,8 @@ const styleVars = computed(() =>
 
 .deck-card--toned {
   background:
-    linear-gradient(var(--deck-glass), var(--deck-glass)) padding-box,
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--c) 55%, transparent),
-      color-mix(in srgb, var(--c) 18%, transparent)) border-box;
+    var(--deck-card-fill) padding-box,
+    var(--deck-card-toned-border) border-box;
 }
 
 .deck-card--interactive:hover {
@@ -166,4 +167,23 @@ const styleVars = computed(() =>
 .deck-card--row .deck-card__icon      { font-size: 1.1rem; }
 .deck-card--row .deck-card__title     { grid-column: 2; grid-row: 1; }
 .deck-card--row .deck-card__body      { grid-column: 1 / -1; grid-row: 2; }
+
+/* Print media (what PDF export renders with): replace the two-layer
+   background — the padding-box fill + border-box gradient ring behind the
+   transparent border — with a plain colour fill and a real border. Skia
+   emits that rounded ring as sliced pattern fills, which Apple's Quartz
+   renderer (Preview) mis-draws as a horizontal band across the card just
+   below the corner radius. A flat background + border-color renders
+   identically everywhere. Values are token-driven, so every look and dark
+   mode keep their colours; on screen nothing changes. */
+@media print {
+  .deck-card {
+    background: var(--deck-glass);
+    border-color: color-mix(in srgb, var(--deck-accent) 30%, var(--deck-glass));
+  }
+  .deck-card--toned {
+    background: color-mix(in srgb, var(--c) 12%, var(--deck-glass));
+    border-color: color-mix(in srgb, var(--c) 36%, var(--deck-glass));
+  }
+}
 </style>

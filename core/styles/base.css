@@ -1,7 +1,12 @@
 /* Shared structural rules for the deck toolkit — variant-agnostic.
-   This file defines NO palette tokens; every colour/font/shadow/blur is read
+   This file defines no palette tokens; every colour/font/shadow/blur is read
    from --deck-* tokens supplied by a palette (core/styles/palette-flat.css by
-   default, or a variant under variants/*). Keep palette values OUT of here. */
+   default, or a variant under variants/*). Keep palette values OUT of here.
+   The one exception: defaults for the per-component decoration tokens (and
+   their @media print equivalents) live below — they reference the
+   component-local --c, so they can't sit at :root in a palette, and this file
+   loads after palette-flat.css, so placing them there would let these plain
+   rules override a palette's print block. */
 
 /* ---------- Base typography & surface ---------- */
 .slidev-layout {
@@ -9,6 +14,14 @@
   color: var(--deck-text);
   background: var(--deck-bg);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+}
+
+/* Slidev styles code blocks with `font-family: var(--slidev-code-font-family)
+   !important`, which beats any selector — bridge its variable to the deck
+   token instead. Without this, code falls back to Slidev's default Fira Code
+   (a variable font that exports to PDF as slow Type 3 outlines). */
+:root {
+  --slidev-code-font-family: var(--deck-font-mono);
 }
 
 .slidev-layout h1,
@@ -141,6 +154,73 @@
   flex-shrink: 0;
 }
 
+/* ---------- Accent-derived decoration tokens ----------
+   Defaults for the per-component decorations that fast-PDF variants flatten
+   (each alpha gradient becomes a PostScript-function shading + soft mask in
+   an exported PDF). They MUST be declared on the component selectors, not
+   :root: a custom property substitutes its var() references where it is
+   DECLARED, and --c only exists on the component element (set by Callout /
+   FeatureCard themselves). On :root the value would compute to
+   guaranteed-invalid and the token would inherit as empty. A variant
+   overrides these with the same selectors (it loads after core, so it wins
+   the cascade at equal specificity). */
+.deck-callout {
+  --deck-callout-rail: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 30%, transparent));
+  --deck-callout-rail-blank: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c) 18%, transparent) 0%,
+    var(--c) 38%,
+    var(--c) 62%,
+    color-mix(in srgb, var(--c) 18%, transparent) 100%
+  );
+  --deck-callout-tile-bg: color-mix(in srgb, var(--c) 14%, transparent);
+}
+.deck-card {
+  --deck-card-toned-border: linear-gradient(135deg,
+    color-mix(in srgb, var(--c) 55%, transparent),
+    color-mix(in srgb, var(--c) 18%, transparent));
+  /* The card's inner fill layer: the glass surface. Translucent in glass, so
+     a toned card's border-box gradient shows through as the tint — glass's
+     @media print swaps in the precomposited tint gradient instead. */
+  --deck-card-fill: linear-gradient(var(--deck-glass), var(--deck-glass));
+}
+
+/* Print media: the same gradients with the transparent ends mixed toward the
+   surface they sit on — visually what alpha compositing produced anyway, but
+   opaque 2-stop gradients are cheap type-2 shadings in the exported PDF,
+   while the alpha versions above emit a PostScript-function shading + soft
+   mask per element (~10ms each, per page view, in Apple Preview). Must come
+   AFTER the defaults above (equal specificity — later wins under print).
+   Variants still win over this block: their stylesheets load after core. */
+@media print {
+  .deck-callout {
+    --deck-callout-rail: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 30%, var(--deck-surface)));
+    --deck-callout-rail-blank: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c) 18%, var(--deck-surface)) 0%,
+      var(--c) 38%,
+      var(--c) 62%,
+      color-mix(in srgb, var(--c) 18%, var(--deck-surface)) 100%
+    );
+    --deck-callout-tile-bg: color-mix(in srgb, var(--c) 14%, var(--deck-surface));
+  }
+  /* (No .deck-card overrides here: under print, FeatureCard.vue swaps its
+     layered background for a plain fill + border-color, so the card tokens
+     above aren't consumed in PDFs at all.) */
+
+  /* Per-slide `zoom:` frontmatter lays the slide out oversized
+     (width = 100%/zoom) and scales it back down with the visual-only
+     `scale` property. In print, the oversized layout box bleeds into
+     Chromium's document width and triggers whole-document print
+     shrink-to-fit: every page of the PDF — zoomed or not — prints at
+     ~77% with white margins right and bottom. Containment keeps the
+     oversized box out of the print scale computation. Safe: the
+     container has explicit inline width/height and is overflow:hidden. */
+  .print-slide-container {
+    contain: strict;
+  }
+}
+
 /* ---------- Monospace pill (global form for raw .md usage) ----------
    Direct-class form: <div class="deck-chip">…</div>. The scoped style in
    Chip.vue mirrors these rules. */
@@ -155,6 +235,6 @@
   font-size: 0.85em;
   line-height: 1.2;
   color: var(--deck-text);
-  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
-  backdrop-filter: blur(var(--deck-blur-sm));
+  -webkit-backdrop-filter: var(--deck-backdrop-sm);
+  backdrop-filter: var(--deck-backdrop-sm);
 }

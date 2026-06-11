@@ -63,8 +63,8 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   border-radius: var(--deck-radius-md);
   border: 1px solid color-mix(in srgb, var(--c) 22%, var(--deck-border));
   background: var(--deck-glass);
-  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
-  backdrop-filter: blur(var(--deck-blur-sm));
+  -webkit-backdrop-filter: var(--deck-backdrop-sm);
+  backdrop-filter: var(--deck-backdrop-sm);
   box-shadow: var(--deck-shadow-sm);
   font-size: 0.92em;
   line-height: 1.55;
@@ -72,13 +72,13 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   position: relative;
   overflow: hidden;
 }
-/* Gradient accent rail along the left edge. */
+/* Accent rail along the left edge (gradient or solid, per palette). */
 .deck-callout::before {
   content: '';
   position: absolute;
   inset: 0 auto 0 0;
   width: 3px;
-  background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 30%, transparent));
+  background: var(--deck-callout-rail);
 }
 
 .deck-callout__icon-tile {
@@ -86,7 +86,7 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--c) 14%, transparent);
+  background: var(--deck-callout-tile-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,13 +163,7 @@ const isCompact = computed(() => props.compact !== undefined && props.compact !=
 .deck-callout--blank.deck-callout--lg { padding-left: 2.1rem; }
 .deck-callout--blank::before {
   width: 4px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--c) 18%, transparent) 0%,
-    var(--c) 38%,
-    var(--c) 62%,
-    color-mix(in srgb, var(--c) 18%, transparent) 100%
-  );
+  background: var(--deck-callout-rail-blank);
 }
 .deck-callout--blank.deck-callout--solid {
   background: var(--deck-surface-2);

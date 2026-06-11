@@ -6,6 +6,19 @@
    overrides these values to produce a different look. Defines the full --deck-*
    token set so the toolkit is never tokenless. */
 
+/* Print-only font (used by the @media print block at the end of this file).
+   ONE @import PER WEIGHT, on purpose: multi-weight css2 requests get a shared
+   VARIABLE file, which Chromium embeds into PDFs as slow Type 3 outline fonts;
+   single-position requests get static instanced files that embed as compact
+   CID subsets. Screens keep the system stack — these fonts only download when
+   print media applies (PDF export). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@1,700&display=swap');
+
 /* ---------- Light tokens ---------- */
 :root {
   /* Accent — teal */
@@ -68,6 +81,19 @@
   --deck-blur:    0px;
   --deck-blur-lg: 0px;
 
+  /* Backdrop-filter — whole-value tokens consumed by Callout/Chip/FeatureCard.
+     `none` (not blur(0px)) so flat slides carry no backdrop-filter at all —
+     an active filter, even at 0px, forces rasterization in PDF export. */
+  --deck-backdrop-sm: none;
+  --deck-backdrop:    none;
+
+  /* Section-divider decorations, tokenized so fast-PDF variants can flatten
+     them (alpha gradients become PostScript-function shadings + soft masks in
+     exported PDFs). Safe at :root because they only reference tokens that
+     exist at :root. */
+  --deck-section-bar: linear-gradient(90deg, var(--deck-section-fg), color-mix(in srgb, var(--deck-section-fg) 10%, transparent));
+  --deck-section-eyebrow-dot: linear-gradient(135deg, var(--deck-section-fg), color-mix(in srgb, var(--deck-section-fg) 55%, transparent));
+
   /* Layout vars */
   --deck-section-max:    72%;
   --deck-section-pad:    3.5rem;
@@ -78,6 +104,18 @@
   --deck-section-from: color-mix(in srgb, var(--deck-accent-deep) 75%, #000);
   --deck-section-via:  var(--deck-accent-deep);
   --deck-section-to:   var(--deck-accent);
+
+  /* Section divider — full background value + blend + foreground, consumed by
+     layouts/section.vue. Layers: SVG fractalNoise grain, top-left highlight
+     (sun on the water), accent glow, base diagonal gradient. A variant can
+     swap all of it for a cheap solid (see variants/minimal, variants/print). */
+  --deck-section-bg:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>"),
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.20), transparent 50%),
+    radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
+    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
+  --deck-section-blend: overlay, normal, normal, normal;
+  --deck-section-fg:    #ffffff;
 
   /* Fonts — system stacks (no web-font dependency) */
   --deck-font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -124,4 +162,52 @@
   --deck-section-from: #04141c;
   --deck-section-via:  #0c3a4a;
   --deck-section-to:   #155f78;
+
+  /* Section divider background — same layers, dimmer grain/highlight for dark */
+  --deck-section-bg:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>"),
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.10), transparent 50%),
+    radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
+    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
+  --deck-section-blend: overlay, normal, normal, normal;
+  --deck-section-fg:    #ffffff;
+}
+
+/* ---------- Print media: cheap-to-render PDF equivalents ----------
+   page.pdf() prints with PRINT media (scripts/export-pdf.mjs emulates it up
+   front), so exported PDFs get these values while screens keep full fidelity.
+   What gets swapped and why:
+   - fonts → static Inter (closest stand-in for system San Francisco, which
+     Chromium can only embed as slow per-page Type 3 outline fonts);
+   - section divider → the same diagonal gradient WITHOUT the grain overlay,
+     blend mode, and radial glows (those rasterize a full-page image + emit
+     PostScript-function shadings: ~1.5s per divider page in Apple Preview).
+   The per-COMPONENT decoration tokens get their print values in base.css,
+   next to their defaults — they cannot live here: base.css loads after this
+   file, so its plain component rules would override a print block placed
+   here (equal specificity, later document order).
+   Dark mode needs no separate blocks: every value is var()-driven.
+   Variants are unaffected: their stylesheets load after core, so their plain
+   :root/component rules win the cascade even under print media. */
+@media print {
+  :root {
+    --deck-font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --deck-font-body:    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    /* Blurred box-shadows: Skia rasterizes each into a grayscale mask image
+       in the PDF, and Apple's Quartz renderer (Preview) paints those images'
+       bounding boxes as solid gray blocks around cards and callouts. Borders
+       carry the structure in print instead. (Literal value, so it also beats
+       the .dark block above — later in document order at equal specificity.) */
+    --deck-shadow-sm:    none;
+    --deck-shadow:       none;
+    --deck-shadow-md:    none;
+    --deck-shadow-lg:    none;
+    --deck-shadow-inset: none;
+
+    --deck-section-bg: linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
+    --deck-section-blend: normal;
+    --deck-section-bar: linear-gradient(90deg, var(--deck-section-fg), color-mix(in srgb, var(--deck-section-fg) 10%, var(--deck-section-via)));
+    --deck-section-eyebrow-dot: linear-gradient(135deg, var(--deck-section-fg), color-mix(in srgb, var(--deck-section-fg) 55%, var(--deck-section-via)));
+  }
 }

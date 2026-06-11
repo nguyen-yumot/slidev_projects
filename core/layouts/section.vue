@@ -2,8 +2,10 @@
   section — a track-divider layout. Gives each part of the tutorial a
   recognisable full-bleed accent slide. Use with `layout: section`.
 
-  Layered background: deep-ocean gradient, soft accent glow, top-left
-  highlight (sun on water), and a subtle SVG grain overlay for texture.
+  The background, blend mode, and foreground colour come from the palette
+  (--deck-section-bg / --deck-section-blend / --deck-section-fg), so each
+  variant decides how rich the divider is: flat/glass layer a gradient,
+  accent glow, and SVG grain; minimal/print use a flat solid.
 -->
 <template>
   <div class="slidev-layout deck-section">
@@ -19,27 +21,13 @@
   display: flex;
   align-items: center;
   padding: 0 var(--deck-section-pad);
-  color: #fff;
-  background:
-    /* Grain texture overlay (inline SVG fractalNoise) */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>"),
-    /* Top-left soft highlight (sun on the water) */
-    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.20), transparent 50%),
-    /* Accent glow */
-    radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
-    /* Base diagonal — driven by the palette's --deck-section-* tokens */
-    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
-  background-blend-mode: overlay, normal, normal, normal;
+  color: var(--deck-section-fg);
+  /* The whole layered background lives in the palette (light + dark blocks) so
+     variants can swap it — flat/glass keep grain + glows, minimal/print use a
+     cheap solid that PDF viewers paint instantly. */
+  background: var(--deck-section-bg);
+  background-blend-mode: var(--deck-section-blend);
   position: relative;
-}
-
-:global(.dark) .deck-section {
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>"),
-    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.10), transparent 50%),
-    radial-gradient(circle at 78% 22%, var(--deck-accent-glow), transparent 55%),
-    linear-gradient(135deg, var(--deck-section-from) 0%, var(--deck-section-via) 45%, var(--deck-section-to) 100%);
-  background-blend-mode: overlay, normal, normal, normal;
 }
 
 .deck-section__inner {
@@ -54,7 +42,7 @@
   width: 64px;
   height: 2px;
   margin-bottom: 1.2rem;
-  background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.1));
+  background: var(--deck-section-bar);
   border-radius: 999px;
 }
 
@@ -63,7 +51,7 @@
   font-size: 3.6rem;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: #fff;
+  color: var(--deck-section-fg);
   line-height: 1.05;
   margin: 0.3rem 0 0.7rem;
 }
@@ -76,11 +64,12 @@
   max-width: 32em;
 }
 
-/* Eyebrow on the dark section: dim slightly + whiten the accent swatch. */
+/* Eyebrow on the section divider: dim slightly + recolour the accent swatch
+   to the divider foreground (white on flat/glass/minimal, ink on print). */
 .deck-section :deep(.deck-eyebrow) {
-  color: rgba(255, 255, 255, 0.85);
+  color: color-mix(in srgb, var(--deck-section-fg) 85%, transparent);
 }
 .deck-section :deep(.deck-eyebrow::before) {
-  background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.55));
+  background: var(--deck-section-eyebrow-dot);
 }
 </style>

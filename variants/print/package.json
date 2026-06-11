@@ -1,0 +1,10 @@
+{
+  "name": "deck-variant-print",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Monochrome print/paper look for the deck toolkit — black-on-white, grayscale semantics, hairline borders, zero PDF-heavy effects. List it after `core` in a deck's `addons:`.",
+  "engines": {
+    "slidev": ">=52"
+  }
+}

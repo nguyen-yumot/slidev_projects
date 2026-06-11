@@ -5,7 +5,28 @@
    blur, layered ocean-tinted shadows, gradient borders, web fonts (Fraunces /
    Inter Tight / JetBrains Mono), and an ocean-blue section divider. */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts — ONE @import PER WEIGHT, on purpose. A multi-weight css2 request
+   (family=…:wght@400;700) makes Google serve a single shared VARIABLE font
+   file, which Chromium cannot subset-embed into exported PDFs — every glyph
+   becomes a slow Type 3 outline font re-parsed per page. Single-position
+   requests are served as static instanced files, which embed as compact CID
+   TrueType subsets. Fraunces' opsz is pinned (144 — it's the display font);
+   an opsz range would keep the variable axis. Same families and weights as
+   before, so rendering is unchanged. */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@144,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,144,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap');
 
 /* ---------- Light tokens ---------- */
 :root {
@@ -69,6 +90,10 @@
   --deck-blur:    14px;
   --deck-blur-lg: 28px;
 
+  /* Backdrop-filter — glass actually blurs (flat/minimal/print set `none`) */
+  --deck-backdrop-sm: blur(var(--deck-blur-sm));
+  --deck-backdrop:    blur(var(--deck-blur));
+
   /* Layout vars */
   --deck-section-max:    72%;
   --deck-section-pad:    3.5rem;
@@ -127,9 +152,11 @@
   --deck-section-to:   #075985;
 }
 
-/* ---------- Backdrop-filter fallback (PDF export, older renderers) ----------
+/* ---------- Backdrop-filter fallback (older renderers) ----------
    When backdrop-filter is unsupported, swap glass surfaces to opaque so nothing
-   disappears against the page background. Must come after the glass tokens above. */
+   disappears against the page background. Must come after the glass tokens above.
+   (PDF export no longer relies on this — the @media print block below handles
+   it with precomposited values.) */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
     --deck-glass: var(--deck-surface);
@@ -138,5 +165,49 @@
   .dark {
     --deck-glass: var(--deck-surface);
     --deck-glass-tint: var(--deck-surface-2);
+  }
+}
+
+/* ---------- Print media: cheap-to-render PDF equivalents ----------
+   Complements core's @media print block (which this file inherits — fonts
+   stay glass's own because this stylesheet loads after core, and core's
+   simplified section gradient picks up glass's ocean stops via the
+   --deck-section-* tokens). Glass-specific swaps:
+   - backdrop blur off: each backdrop-filter region rasterizes into the PDF;
+   - translucent fills precomposited to opaque (the per-element transparency
+     was the bulk of the remaining per-page cost: ~200ms on card/callout-heavy
+     pages in Apple Preview);
+   - gradient borders with alpha stops become opaque mixes (alpha-stop
+     gradients emit a PostScript-function shading + soft mask per element). */
+@media print {
+  :root {
+    --deck-backdrop-sm: none;
+    --deck-backdrop:    none;
+
+    /* Blurred shadows render as gray blocks in Apple Preview (Skia rasterizes
+       them into mask images Quartz mishandles) — same swap as core's print
+       block, repeated here because glass's own :root/.dark rules above would
+       otherwise out-cascade core's print block (later stylesheet). */
+    --deck-shadow-sm:    none;
+    --deck-shadow:       none;
+    --deck-shadow-md:    none;
+    --deck-shadow-lg:    none;
+    --deck-shadow-inset: none;
+    /* Translucent fills, precomposited onto the page background. With the
+       backdrop blur off (above), translucency over the flat bg produces a
+       fixed colour anyway — identical look, but the PDF gets plain opaque
+       fills instead of per-element transparency. */
+    --deck-glass:      color-mix(in srgb, #ffffff 62%, var(--deck-bg));
+    --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 4%, var(--deck-bg));
+    --deck-border-grad: linear-gradient(135deg,
+      color-mix(in srgb, #0284c7 38%, var(--deck-surface)),
+      color-mix(in srgb, #0891b2 22%, var(--deck-surface)));
+  }
+  .dark {
+    --deck-glass:      color-mix(in srgb, #14202f 55%, var(--deck-bg));
+    --deck-glass-tint: color-mix(in srgb, var(--deck-accent) 6%, var(--deck-bg));
+    --deck-border-grad: linear-gradient(135deg,
+      color-mix(in srgb, #38bdf8 45%, var(--deck-surface)),
+      color-mix(in srgb, #22d3ee 30%, var(--deck-surface)));
   }
 }

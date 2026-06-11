@@ -1,0 +1,180 @@
+/* palette-print — a monochrome "paper" look, built for instant-opening PDFs.
+
+   Loaded as `addons: ['@/core', '@/variants/print']` (after core), so these
+   values override core/styles/palette-flat.css. Black-on-white like a printed
+   handout: ink text, grayscale semantic colours (callout types stay tellable
+   apart by icon + label), hairline opaque borders, tighter radii, and zero
+   PDF-heavy effects — no shadows, no backdrop-filter, no blend modes, no
+   gradients, no alpha anywhere. The section divider inverts to paper: a black
+   title on white over the thin chapter bar.
+
+   Print is inherently a light look, so the .dark block mirrors the light
+   values — toggling dark mode never produces a half-styled slide.
+
+   Fonts are Lato + IBM Plex Mono (web fonts), NOT the system stack: on macOS
+   `ui-sans-serif` resolves to San Francisco — a variable font — and Chromium
+   embeds variable fonts in PDFs as Type 3 vector-procedure fonts, re-parsed
+   on every page. THAT (not effects) is the main reason big exported PDFs
+   render slowly. The families below are ones Google Fonts still serves as
+   STATIC files (Inter/Roboto/JetBrains Mono now come back variable, so they
+   would hit the same Type 3 path); static TrueType embeds as compact CID
+   subsets that viewers paint instantly. Lato ships 400/700 only — CSS weight
+   600 resolves to the real 700 face (no Type 3 synthetic bold). */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* ---------- Light tokens ---------- */
+:root {
+  /* Accent — ink */
+  --deck-accent:        #111827;
+  --deck-accent-deep:   #000000;
+  --deck-accent-soft:   #e5e7eb;
+  --deck-accent-glow:   #d1d5db;
+
+  /* Semantic alert colors — distinguishable grays (legible as text) */
+  --deck-tip:     #374151;   /* gray-700 */
+  --deck-warning: #4b5563;   /* gray-600 */
+  --deck-note:    #1f2937;   /* gray-800 */
+  --deck-try:     #6b7280;   /* gray-500 */
+  --deck-pos:     #374151;   /* swap to desaturated green if grays read poorly */
+  --deck-neg:     #111827;   /* swap to desaturated red if grays read poorly */
+
+  /* Surfaces — pure paper, opaque */
+  --deck-bg:         #ffffff;
+  --deck-surface:    #ffffff;
+  --deck-surface-2:  #f4f4f5;
+  --deck-glass:      #ffffff;
+  --deck-glass-tint: #f4f4f5;
+
+  /* Borders — opaque hairlines */
+  --deck-border:        #d4d4d8;
+  --deck-border-strong: #a1a1aa;
+  /* Consumed as an <image> (FeatureCard border layer, multicol bar) — keep
+     the gradient form, with both stops the same opaque colour. */
+  --deck-border-grad:   linear-gradient(#d4d4d8, #d4d4d8);
+
+  /* Text — ink scale */
+  --deck-text:        #374151;
+  --deck-text-strong: #111827;
+  --deck-text-muted:  #6b7280;
+  --deck-text-faint:  #9ca3af;
+
+  /* Radii — tighter, printed-matter feel */
+  --deck-radius-sm: 4px;
+  --deck-radius:    6px;
+  --deck-radius-md: 8px;
+  --deck-radius-lg: 10px;
+  --deck-radius-xl: 12px;
+
+  /* Spacing scale */
+  --deck-space-1: 0.25rem;
+  --deck-space-2: 0.5rem;
+  --deck-space-3: 0.75rem;
+  --deck-space-4: 1rem;
+  --deck-space-5: 1.5rem;
+  --deck-space-6: 2rem;
+  --deck-space-7: 3rem;
+
+  /* Shadows — none (hairline borders carry the structure) */
+  --deck-shadow-sm:    none;
+  --deck-shadow:       none;
+  --deck-shadow-md:    none;
+  --deck-shadow-lg:    none;
+  --deck-shadow-inset: none;
+
+  /* Blur / backdrop — fully off */
+  --deck-blur-sm: 0px;
+  --deck-blur:    0px;
+  --deck-blur-lg: 0px;
+  --deck-backdrop-sm: none;
+  --deck-backdrop:    none;
+
+  /* Section-divider decorations — solid instead of flat's alpha gradients
+     (each alpha gradient becomes a PostScript-function shading + soft mask in
+     the exported PDF). Per-component decoration tokens live at the bottom of
+     this file, on the component selectors. */
+  --deck-section-bar:        var(--deck-section-fg);
+  --deck-section-eyebrow-dot: var(--deck-section-fg);
+
+  /* Layout vars */
+  --deck-section-max:    72%;
+  --deck-section-pad:    3.5rem;
+  --deck-multicol-pad-y: 2.2rem;
+  --deck-multicol-pad-x: 3rem;
+
+  /* Section divider — inverted to paper: white page, ink title */
+  --deck-section-from: #ffffff;
+  --deck-section-via:  #ffffff;
+  --deck-section-to:   #ffffff;
+  --deck-section-bg:    #ffffff;
+  --deck-section-blend: normal;
+  --deck-section-fg:    #111827;
+
+  /* Fonts — embeddable static web fonts (see header note; system SF would
+     force slow Type 3 embedding in exported PDFs) */
+  --deck-font-display: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-body:    'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --deck-font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Accent decorations — solid fills instead of core's alpha gradients, which
+   become PostScript-function shadings + soft masks in exported PDFs. Declared
+   on the component selectors (NOT :root) because the values reference --c,
+   which only exists on the component element; these win over core's defaults
+   in base.css because this addon loads after core. */
+.deck-callout {
+  --deck-callout-rail:       var(--c);
+  --deck-callout-rail-blank: var(--c);
+  --deck-callout-tile-bg:    color-mix(in srgb, var(--c) 14%, var(--deck-glass));
+}
+.deck-card {
+  /* Used in a layered `background` shorthand slot that needs an <image>, so a
+     bare color is invalid there — a same-color 2-stop gradient is the cheap
+     opaque equivalent. */
+  --deck-card-toned-border: linear-gradient(
+    color-mix(in srgb, var(--c) 40%, var(--deck-glass)),
+    color-mix(in srgb, var(--c) 40%, var(--deck-glass)));
+}
+
+/* ---------- Dark tokens — print stays paper (mirrors light) ---------- */
+.dark {
+  --deck-accent:        #111827;
+  --deck-accent-deep:   #000000;
+  --deck-accent-soft:   #e5e7eb;
+  --deck-accent-glow:   #d1d5db;
+
+  --deck-tip:     #374151;
+  --deck-warning: #4b5563;
+  --deck-note:    #1f2937;
+  --deck-try:     #6b7280;
+  --deck-pos:     #374151;
+  --deck-neg:     #111827;
+
+  --deck-bg:         #ffffff;
+  --deck-surface:    #ffffff;
+  --deck-surface-2:  #f4f4f5;
+  --deck-glass:      #ffffff;
+  --deck-glass-tint: #f4f4f5;
+
+  --deck-border:        #d4d4d8;
+  --deck-border-strong: #a1a1aa;
+  --deck-border-grad:   linear-gradient(#d4d4d8, #d4d4d8);
+
+  --deck-text:        #374151;
+  --deck-text-strong: #111827;
+  --deck-text-muted:  #6b7280;
+  --deck-text-faint:  #9ca3af;
+
+  --deck-shadow-sm:    none;
+  --deck-shadow:       none;
+  --deck-shadow-md:    none;
+  --deck-shadow-lg:    none;
+  --deck-shadow-inset: none;
+
+  --deck-section-from: #ffffff;
+  --deck-section-via:  #ffffff;
+  --deck-section-to:   #ffffff;
+  --deck-section-bg:    #ffffff;
+  --deck-section-blend: normal;
+  --deck-section-fg:    #111827;
+}

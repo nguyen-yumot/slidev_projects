@@ -58,8 +58,8 @@ const styleVars = computed(() =>
   font-size: 0.85em;
   line-height: 1.2;
   color: var(--deck-text);
-  -webkit-backdrop-filter: blur(var(--deck-blur-sm));
-  backdrop-filter: blur(var(--deck-blur-sm));
+  -webkit-backdrop-filter: var(--deck-backdrop-sm);
+  backdrop-filter: var(--deck-backdrop-sm);
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 .deck-chip__pill:hover {
