@@ -99,13 +99,52 @@ async function main() {
     // render signals instead.
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 })
 
-    // Wait for the export layout, then for every slide's loading spinner to detach.
+    // A slide that fails to load renders Slidev's error layout, whose root has NO
+    // .slidev-layout class — the readiness wait below would then spin to its full
+    // timeout. Slidev logs these failures to the console ("Failed to load slide N" /
+    // "slide failed to load"), so abort immediately with the slide number instead.
+    let slideLoadError
+    const slideErrored = new Promise((_, reject) => {
+      page.on('console', (msg) => {
+        const text = msg.text()
+        const no = text.match(/Failed to load slide (\d+)/)?.[1]
+          ?? (text.includes('slide failed to load') ? text.match(/\/@slidev\/slides\/(\d+)\//)?.[1] ?? '?' : null)
+        if (no !== null && !slideLoadError) reject(slideLoadError = new Error(`slide ${no} failed to load — aborting export`))
+      })
+    })
+    // The error can fire while we're still awaiting something else below — before
+    // Promise.race subscribes. An unhandled rejection would crash the process and skip
+    // the finally (leaving the dev server orphaned), so mark it handled right away;
+    // the race still receives the rejection whenever it subscribes.
+    slideErrored.catch(() => {})
+
+    // Wait for the export layout, then for every slide to be POSITIVELY rendered.
+    // "No loading spinner" is NOT that signal: each slide is an async component with
+    // `delay: 300`, so for its first 300ms it renders NOTHING — right after mount the
+    // page has zero `.slidev-slide-loading` elements while all slides are still loading,
+    // and a spinner-count check passes instantly. Slides that miss the settle window
+    // then print as the "Loading slide..." placeholder (Mermaid is the usual victim:
+    // it's excluded from Vite pre-bundling, so its big raw ESM graph loads slowest).
+    // Instead require, for every slide container: a resolved slide layout inside it,
+    // no loading fallback anywhere, and every Mermaid diagram's SVG present (Mermaid
+    // renders asynchronously into an OPEN shadow root AFTER its slide resolves; the
+    // .mermaid class sits on the shadow host, so shadowRoot.querySelector sees the svg).
     await page.locator('#export-content').waitFor({ state: 'attached', timeout: 60000 })
-    await page.waitForFunction(
-      () => document.querySelectorAll('.slidev-slide-loading').length === 0,
-      undefined,
-      { timeout: 120000 },
-    )
+    await Promise.race([
+      page.waitForFunction(
+        () => {
+          const containers = [...document.querySelectorAll('#export-content .print-slide-container')]
+          if (containers.length === 0) return false
+          if (document.querySelector('.slidev-slide-loading')) return false
+          if (!containers.every(c => c.querySelector('.slidev-layout'))) return false
+          const mermaids = [...document.querySelectorAll('.mermaid')]
+          return mermaids.every(m => m.shadowRoot?.querySelector('svg'))
+        },
+        undefined,
+        { timeout: 120000 },
+      ),
+      slideErrored,
+    ])
     await page.evaluate(() => document.fonts.ready.then(() => {}))
     // export.vue uses a 1s initial settle; give a little more for KaTeX/Shiki/Mermaid paint.
     await page.waitForTimeout(2000)

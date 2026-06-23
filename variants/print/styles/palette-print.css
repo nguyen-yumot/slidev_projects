@@ -1,6 +1,6 @@
 /* palette-print — a monochrome "paper" look, built for instant-opening PDFs.
 
-   Loaded as `addons: ['@/core', '@/variants/print']` (after core), so these
+   Loaded as `addons: ['deck-core', 'deck-variant-print']` (after core), so these
    values override core/styles/palette-flat.css. Black-on-white like a printed
    handout: ink text, grayscale semantic colours (callout types stay tellable
    apart by icon + label), hairline opaque borders, tighter radii, and zero

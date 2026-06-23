@@ -1,6 +1,6 @@
 ---
 theme: default
-addons: ['@/core', '@/variants/glass']
+addons: ['deck-core', 'deck-variant-glass']
 title: Slidev Tutorial — Beginner to Advanced
 info: |
   ## Slidev Tutorial
@@ -62,17 +62,17 @@ The whole tutorial <strong>is</strong> a Slidev deck. Press <KeyCap>o</KeyCap> a
 </div>
 
 ---
-src: ./pages/tutorial/01-beginner.md
+src: ./pages/01-beginner.md
 ---
 
 ---
-src: ./pages/tutorial/02-intermediate.md
+src: ./pages/02-intermediate.md
 ---
 
 ---
-src: ./pages/tutorial/03-advanced.md
+src: ./pages/03-advanced.md
 ---
 
 ---
-src: ./pages/tutorial/04-toolkit.md
+src: ./pages/04-toolkit.md
 ---

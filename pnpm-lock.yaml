@@ -17,6 +17,18 @@ importers:
       '@slidev/theme-seriph':
         specifier: ^0.25.0
         version: 0.25.0
+      deck-core:
+        specifier: workspace:*
+        version: link:core
+      deck-variant-glass:
+        specifier: workspace:*
+        version: link:variants/glass
+      deck-variant-minimal:
+        specifier: workspace:*
+        version: link:variants/minimal
+      deck-variant-print:
+        specifier: workspace:*
+        version: link:variants/print
       katex:
         specifier: 0.16.47
         version: 0.16.47
@@ -33,6 +45,18 @@ importers:
       playwright-chromium:
         specifier: ^1.60.0
         version: 1.60.0
+
+  core:
+    dependencies:
+      katex:
+        specifier: 0.16.47
+        version: 0.16.47
+
+  variants/glass: {}
+
+  variants/minimal: {}
+
+  variants/print: {}
 
 packages:
 

@@ -5,12 +5,17 @@
   "description": "A workspace of Slidev decks.",
   "scripts": {
     "dev": "slidev",
+    "dev:template": "slidev decks/template/slides.md",
     "build": "slidev build",
     "export": "slidev export",
     "preview:pages": "bash scripts/deploy.sh --no-publish",
     "deploy:pages": "bash scripts/deploy.sh"
   },
   "dependencies": {
+    "deck-core": "workspace:*",
+    "deck-variant-glass": "workspace:*",
+    "deck-variant-minimal": "workspace:*",
+    "deck-variant-print": "workspace:*",
     "@slidev/cli": "52.15.2",
     "@slidev/theme-default": "0.25.0",
     "@slidev/theme-seriph": "^0.25.0",

@@ -1,8 +1,8 @@
 # ─── Whitelist: this repo tracks only the customization toolkit ───────
 # Strategy: ignore EVERYTHING, then re-include just the toolkit folders
-# and a short list of root files. Anything else — any deck, asset folder,
-# script, or new root file, now or in the future — is ignored by default
-# and will not be committed.
+# and a short list of root files. Anything else — any private deck, asset
+# folder, script, or new root file, now or in the future — is ignored by
+# default and will not be committed.
 
 # Ignore every top-level entry...
 /*
@@ -17,25 +17,22 @@
 !/pnpm-lock.yaml
 !/pnpm-workspace.yaml
 !/README.md
-!/slides.md
-!/Slidev_tutorial.md
+!/CLAUDE.md
 
-# Selected content out of pages/ — re-include the dir (so git descends),
-# ignore its contents, then keep just the demo section and the tutorial
-# deck's sections. Everything else under pages/ stays ignored.
-!/pages/
-/pages/*
-!/pages/example.md
-!/pages/tutorial/
+# Decks live one-per-folder under decks/<name>/ (slides.md + pages/ + public/ + data/).
+# Re-include the dir (so git descends), ignore its contents, then keep only the two
+# decks that ship with the toolkit: the starter template and the tutorial. Every other
+# deck — private presentations — stays ignored automatically.
+!/decks/
+/decks/*
+!/decks/template/
+!/decks/tutorial/
 
-# ...and two demo assets out of public/ (same three-step, then pick the files).
-# Everything else under public/ — other decks' images — stays ignored.
-!/public/
-/public/*
-!/public/tutorial/
-/public/tutorial/*
-!/public/tutorial/layout-demo.svg
-!/public/tutorial/slidev-logo.png
+# Inside the tutorial deck, track only the two demo assets out of public/
+# (same three-step, then pick the files).
+/decks/tutorial/public/*
+!/decks/tutorial/public/layout-demo.svg
+!/decks/tutorial/public/slidev-logo.png
 
 # The deploy script + its helpers (tracked so anyone with the repo can publish); other
 # scripts (figure pipelines, scratch tools) stay ignored — same three-step.
@@ -44,7 +41,11 @@
 !/scripts/deploy.sh
 !/scripts/export-pdf.mjs
 
-# Junk to keep out even inside the tracked folders above.
+# Junk to keep out even inside the tracked folders above (node_modules appears
+# inside core/ and variants/ now that they are pnpm workspace packages).
+node_modules/
+dist/
+.vite-inspect/
 .DS_Store
 *.swp
 *.log

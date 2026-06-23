@@ -1,6 +1,6 @@
 /* palette-minimal — flat's teal look with every PDF-heavy effect stripped.
 
-   Loaded as `addons: ['@/core', '@/variants/minimal']` (after core), so these
+   Loaded as `addons: ['deck-core', 'deck-variant-minimal']` (after core), so these
    values override core/styles/palette-flat.css. Built for big decks whose
    exported PDFs must open instantly in any viewer: no shadows, no
    backdrop-filter, no blend modes, no gradients on the section divider, and

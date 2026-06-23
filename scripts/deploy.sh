@@ -5,21 +5,22 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."          # always run from the repo root
 
-# ── Decks to publish. One filename per line (at the repo root). Each deck's card title
-#    and PDF filename come from the deck's own front-matter `title` (→ first `# H1` →
-#    filename), resolved by core/setup/deck-name.mjs — the same name `pnpm dev` exports.
-#    The URL is always /<name>/, where <name> is the filename minus `Slidev_` and `.md`.
+# ── Decks to publish. One folder name per line — each is decks/<name>/ with the deck's
+#    entry at decks/<name>/slides.md. Each deck's card title and PDF filename come from
+#    the deck's own front-matter `title` (→ first `# H1` → filename), resolved by
+#    core/setup/deck-name.mjs — the same name `pnpm dev` exports.
+#    The URL is always /<name>/ (the folder name).
 DECKS=(
-  "Slidev_tutorial.md"
-  "Slidev_statistics.md"
+  "tutorial"
+  "statistics"
 )
 
-# Split a DECKS entry into globals DECK_FILE (the deck path) and DECK_NAME (its URL
-# segment: the filename minus the `Slidev_` prefix and `.md`). The card title / PDF name
-# is the deck's front-matter `title`, resolved per-deck in the build loop below.
+# Split a DECKS entry into globals DECK_FILE (the deck's entry file) and DECK_NAME (its
+# URL segment: the decks/ folder name). The card title / PDF name is the deck's
+# front-matter `title`, resolved per-deck in the build loop below.
 parse_deck() {
-  DECK_FILE=$1
-  DECK_NAME=$(basename "$DECK_FILE" .md | sed 's/^Slidev_//')
+  DECK_NAME=$1
+  DECK_FILE="decks/$1/slides.md"
 }
 
 # HTML-escape for safe use as element text AND inside a double-quoted attribute (" escaped).
@@ -61,7 +62,7 @@ for entry in "${DECKS[@]}"; do
   i=$((i + 1)); idx=$(printf '%02d' "$i")   # 01, 02, … ordinal for each card
   echo "▶ building $DECK_FILE  →  dist/$DECK_NAME  (base /$REPO/$DECK_NAME/) + PDF"
   # The deck's front-matter `title` (→ first `# H1` → filename) is the single source of the
-  # name, resolved here and — via @/core's setup/preparser.ts — inside Slidev itself, so both
+  # name, resolved here and — via deck-core's setup/preparser.ts — inside Slidev itself, so both
   # sides agree on the PDF path. TITLE is the display title (card text, verbatim); PDF_FILE is
   # the filesystem-safe form (--file collapses "/" so a "TCP/IP" title can't scatter the PDF
   # into a subfolder), matching the exportFilename the preparser sets; PDF_HREF its URL-encoded
@@ -76,7 +77,9 @@ for entry in "${DECKS[@]}"; do
   #   sets exportFilename, so the build writes the PDF as dist/<name>/<title>.pdf and the button
   #   points there; its content is unreliable (truncated/blank — see step 2), so step 2 overwrites
   #   that same file.
-  pnpm exec slidev build "$DECK_FILE" --base "/$REPO/$DECK_NAME/" --out "dist/$DECK_NAME" \
+  # --out must be ABSOLUTE: Slidev resolves a relative outDir against the deck's own
+  # folder (decks/<name>/), not the cwd, which would scatter dist/ into each deck.
+  pnpm exec slidev build "$DECK_FILE" --base "/$REPO/$DECK_NAME/" --out "$PWD/dist/$DECK_NAME" \
     --download
 
   # Step 2 — overwrite that PDF with one from Slidev's BROWSER exporter (the /export page you get

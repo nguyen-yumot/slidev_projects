@@ -1,22 +1,23 @@
-// The single rule for a deck's export name, shared by the @/core preparser
+// The single rule for a deck's export name, shared by the deck-core preparser
 // (setup/preparser.ts, runs in dev + build + export) and scripts/deploy.sh.
 //
 // Resolve order — front-matter `title` → first `# H1` → the markdown filename:
 //   1. `title:` in the leading `---…---` headmatter (quotes stripped), if non-empty.
 //   2. else the first `# Heading` in the body.
-//   3. else the filename stem, e.g. `Slidev_tutorial.md` → "Slidev_tutorial".
+//   3. else the filename stem — except a generic `slides.md`, which falls back to
+//      its deck folder, e.g. `decks/tutorial/slides.md` → "tutorial".
 //
 // This name is the landing-page card title (verbatim) and — after toExportFilename()
 // makes it filesystem-safe — the PDF filename everywhere (the in-deck Download button,
 // the /export print dialog, `slidev build --download`, and the landing-page PDF link),
 // so `pnpm dev` and a published deck always agree.
 //
-//   import { resolveDeckName, toExportFilename } from '@/core/setup/deck-name.mjs'
+//   import { resolveDeckName, toExportFilename } from 'deck-core/setup/deck-name.mjs'
 //   node core/setup/deck-name.mjs <deckFile>           // prints the display title
 //   node core/setup/deck-name.mjs <deckFile> --file    // prints the filesystem-safe stem
 
 import { readFileSync } from 'node:fs'
-import { basename } from 'node:path'
+import { basename, dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const RE_FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---/   // leading headmatter block only
@@ -42,7 +43,8 @@ export function resolveDeckName(filepath) {
   const h1 = body.match(RE_H1)
   if (h1) return h1[1].trim()
 
-  return basename(filepath).replace(/\.md$/i, '')
+  const stem = basename(filepath).replace(/\.md$/i, '')
+  return stem.toLowerCase() === 'slides' ? basename(dirname(filepath)) : stem
 }
 
 // Make a resolved name safe as a single PDF filename. `/` and `\` are path separators —

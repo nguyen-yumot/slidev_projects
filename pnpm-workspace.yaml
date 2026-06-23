@@ -1,3 +1,12 @@
+# The toolkit lives in this repo as workspace packages: the shared `deck-core`
+# addon plus one `deck-variant-*` package per look. Linking them into the root
+# node_modules lets every deck — at any folder depth — load them by package
+# name in its `addons:` front matter (Slidev resolves bare addon names through
+# node_modules, walking up from the deck's folder).
+packages:
+  - core
+  - variants/*
+
 # The Playwright browser binary is installed separately via
 # `playwright install chromium`, so playwright-chromium's postinstall
 # script is intentionally skipped. This keeps `slidev build` — which
