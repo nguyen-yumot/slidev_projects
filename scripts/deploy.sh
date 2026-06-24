@@ -239,10 +239,11 @@ cat > dist/index.html <<EOF
 EOF
 cp dist/index.html dist/404.html
 touch dist/.nojekyll
-# Empty .gitignore in the output: gh-pages (--dotfiles) copies it over the repo's
+# Permissive .gitignore in the output: gh-pages (--dotfiles) copies it over the repo's
 # whitelist .gitignore in its publish work tree, so the built files are NOT ignored
 # when staged. Without this, only .gitignore lands on gh-pages and every URL 404s.
-printf '# published site — nothing ignored here\n' > dist/.gitignore
+# It still ignores .DS_Store so macOS junk from the gh-pages work tree never publishes.
+printf '# published site — track everything except macOS junk\n.DS_Store\n' > dist/.gitignore
 find dist -name '.DS_Store' -delete 2>/dev/null || true   # don't publish macOS junk
 
 if [ "${1:-}" = "--no-publish" ]; then
