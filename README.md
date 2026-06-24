@@ -1,10 +1,24 @@
 # Slidev deck toolkit
 
-A [Slidev](https://sli.dev) workspace with a small, reusable component toolkit baked in. The toolkit is a shared **`core/`** (components, layouts, structural styles + the default *flat* palette) plus look **variants** under `variants/` (`glass`, `minimal`, `print`); a deck opts in through its `addons:` frontmatter and switches looks by changing that one line — see [Looks](#looks). Each presentation is a self-contained folder under **`decks/`**. Two reference decks ship with it: `decks/template/` walks through every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev itself.
+A [Slidev](https://sli.dev) workspace with a small, reusable component toolkit baked in. The toolkit is a shared **`core/`** (components, layouts, structural styles + the default *flat* palette) plus look **variants** under `variants/` (`glass`, `minimal`, `print`); a deck opts in through its `addons:` frontmatter and switches looks by changing that one line — see [Looks](#6-looks). Each presentation is a self-contained folder under **`decks/`**. Two reference decks ship with it: `decks/template/` walks through every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev itself.
 
-The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the config — and ignores everything else by default. You can author as many of your own decks as you like; they run locally but won't be committed unless you opt them in. See [What gets committed](#what-gets-committed-the-whitelist).
+The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the config — and ignores everything else by default. You can author as many of your own decks as you like; they run locally but won't be committed unless you opt them in. See [What gets committed](#8-what-gets-committed-the-whitelist).
 
-## Quick start
+## Contents
+
+1. [Quick start](#1-quick-start)
+2. [Prerequisites](#2-prerequisites)
+3. [Commands](#3-commands)
+4. [Publish decks online (GitHub Pages)](#4-publish-decks-online-github-pages)
+5. [Toolkit reference](#5-toolkit-reference)
+6. [Looks](#6-looks)
+7. [Project structure](#7-project-structure)
+8. [What gets committed (the whitelist)](#8-what-gets-committed-the-whitelist)
+9. [Editing](#9-editing)
+10. [Convert an existing Markdown file into a deck](#10-convert-an-existing-markdown-file-into-a-deck)
+11. [Reusing this toolkit elsewhere](#11-reusing-this-toolkit-elsewhere)
+
+## 1. Quick start
 
 ```bash
 pnpm install                       # one-time: install dependencies (links the toolkit packages)
@@ -23,14 +37,14 @@ Every folder under `decks/` is one presentation; its entry file is always `decks
 | `decks/template/` | Starter walk-through of the component toolkit | `pnpm dev:template` |
 | `decks/tutorial/` | Beginner-to-advanced guide to Slidev itself | `pnpm dev decks/tutorial/slides.md` |
 
-To add another deck, copy the starter — `cp -R decks/template decks/your-deck` — set the headmatter `title`, and run `pnpm dev decks/your-deck/slides.md`. In its headmatter keep `theme: default` and `addons: ['deck-core', 'deck-variant-glass']` (or `['deck-core']` for the flat look) — **without an `addons:` line the deck gets no toolkit** (no components, no styling). It runs immediately, but is **gitignored by default** — opt it in if you want it committed ([details below](#tracking-a-new-deck)). Split sections out into the deck's `pages/` and pull each in via the `src:` frontmatter key — see [Editing](#editing).
+To add another deck, copy the starter — `cp -R decks/template decks/your-deck` — set the headmatter `title`, and run `pnpm dev decks/your-deck/slides.md`. In its headmatter keep `theme: default` and `addons: ['deck-core', 'deck-variant-glass']` (or `['deck-core']` for the flat look) — **without an `addons:` line the deck gets no toolkit** (no components, no styling). It runs immediately, but is **gitignored by default** — opt it in if you want it committed ([details below](#tracking-a-new-deck)). Split sections out into the deck's `pages/` and pull each in via the `src:` frontmatter key — see [Editing](#9-editing).
 
-## Prerequisites
+## 2. Prerequisites
 
 - [Node.js](https://nodejs.org) 20.12 or newer (required by Slidev v52)
 - [pnpm](https://pnpm.io) — `npm install -g pnpm`
 
-## Commands
+## 3. Commands
 
 Every command takes a deck's entry file (`decks/<name>/slides.md`).
 
@@ -53,9 +67,29 @@ pnpm export decks/tutorial/slides.md  # export the tutorial deck to PDF
 
 CLI export (`pnpm export`) uses `playwright-chromium`, a tracked dev dependency that `pnpm install` already brings in — just install its browser once with `pnpm exec playwright install chromium`. Without the browser, use the in-browser exporter at `localhost:3030/export`, which needs nothing extra.
 
-## Publish decks online (GitHub Pages)
+## 4. Publish decks online (GitHub Pages)
 
-Publish your decks as links anyone can open — no install, no account. Only the compiled output is pushed to a `gh-pages` branch; your `.md` source stays on your machine. Follow these steps in order.
+Publish your decks as links anyone can open — no install, no account. Only the compiled output is pushed to a `gh-pages` branch; your `.md` source stays on your machine.
+
+### Source vs. site — two separate things
+
+Saving your work and updating the website are **two independent actions** — doing one never does the other:
+
+| | Source code | Live site |
+| --- | --- | --- |
+| **Where it lives** | the `master` branch | the `gh-pages` branch (auto-generated) |
+| **Update it with** | `git add` / `git commit` / `git push` | `bash scripts/deploy.sh` (= `pnpm deploy:pages`) |
+| **What it stores** | your `.md` files, README, scripts | the built HTML + PDFs from `dist/` |
+| **Edit it by hand?** | yes | no — it's overwritten on every deploy |
+
+- **To update the website**, run `bash scripts/deploy.sh`. It builds the decks and pushes the output to `gh-pages` for you — you never `git commit` to `gh-pages` yourself.
+- **To save your source on GitHub**, `git push` to `master`. This does **not** change the live site.
+
+You can do either, both, or neither: deploy without committing (the site changes, your source stays only on your machine), or commit without deploying (your source is saved, the live slides are unchanged). And note the whitelist ([What gets committed](#8-what-gets-committed-the-whitelist)): a gitignored deck's `.md` never reaches GitHub at all, so for those decks `bash scripts/deploy.sh` is the **only** way the slides get online (as built HTML + PDF).
+
+### Publishing, step by step
+
+Follow these in order:
 
 **1. Choose which decks to publish.** Edit the `DECKS` list at the top of [`scripts/deploy.sh`](scripts/deploy.sh) — add or remove deck folder names (each entry is a `decks/<name>/` folder). Only the listed decks are published.
 
@@ -69,14 +103,14 @@ pnpm exec playwright install chromium   # one-time: the headless browser used fo
 **3. Preview locally** (optional):
 
 ```bash
-pnpm preview:pages
+pnpm preview:pages        # same as: bash scripts/deploy.sh --no-publish
 npx serve .preview        # then open http://localhost:3000/<repo>/
 ```
 
 **4. Publish** — builds the listed decks and pushes them to the `gh-pages` branch:
 
 ```bash
-pnpm deploy:pages
+pnpm deploy:pages         # or, equivalently: bash scripts/deploy.sh
 ```
 
 **5. Turn on GitHub Pages** (first time only). On GitHub, open **Settings → Pages → Build and deployment → Source**, choose **"Deploy from a branch"**, then branch **`gh-pages`** and folder **`/ (root)`**, and Save.
@@ -93,6 +127,24 @@ https://<owner>.github.io/<repo>/statistics/
 
 > **Public vs private.** Your `.md` source is never pushed, but a published deck's rendered slides and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
 
+### If publishing fails
+
+`pnpm deploy:pages` (i.e. `bash scripts/deploy.sh`) reuses a cached clone of the `gh-pages` branch under `node_modules/.cache/gh-pages/`. If a previous run was interrupted, the **publish** step can fail — the **build still succeeds**, so `dist/` is complete — with a Git error like:
+
+```
+unable to create temporary file: Invalid argument
+fatal: adding files failed
+```
+
+Clear the stale cache, then re-publish the already-built `dist/` (no rebuild needed):
+
+```bash
+pnpm exec gh-pages-clean                                          # wipe the cached clone (do NOT rm -rf it)
+pnpm exec gh-pages -d dist --dotfiles --no-history -b gh-pages    # push dist/ to the gh-pages branch
+```
+
+`gh-pages-clean` ships with the `gh-pages` dependency. Confirm the push landed with `git ls-remote --heads origin gh-pages` — the commit hash should change.
+
 ### PDF downloads for viewers
 
 Every published deck is exported to PDF at deploy time, so viewers can save a copy with no install and no browser fiddling. Each deck offers it two ways:
@@ -107,7 +159,7 @@ This needs the `playwright-chromium` browser from step 2; if it's missing, `pnpm
 - **`scripts/deploy.sh`** lets a single command do everything publishing needs: build every deck in the `DECKS` list, export each to PDF, generate the landing page, and push only the compiled output to `gh-pages`. Without it you would have to build and deploy each deck by hand.
 - **Image paths are fixed automatically.** On GitHub Pages each deck lives under a `/<repo>/<name>/` sub-path, but decks reference their public images from the web root (e.g. `/chart.svg` for `decks/<name>/public/chart.svg`). The toolkit (`core/global-bottom.vue`) rewrites those paths to include the sub-path at runtime, so images that work in `pnpm dev` also work once published — no edits needed.
 
-## Toolkit reference
+## 5. Toolkit reference
 
 Components are auto-imported — use them directly in any slide.
 
@@ -129,7 +181,7 @@ Layouts (set per slide via `layout:`):
 
 The look is driven by `--deck-*` CSS variables defined in a **palette** file — `core/styles/palette-flat.css` (the flat default) or a variant's palette under `variants/*/styles/` (`palette-glass.css`, `palette-minimal.css`, `palette-print.css`). The shared structural rules live in `core/styles/base.css`. To re-skin, switch the palette via `addons:` (below) rather than editing components.
 
-## Looks
+## 6. Looks
 
 The toolkit ships one shared **core** and one or more **look variants**, wired as Slidev addons via pnpm **workspace packages** (`core/` and `variants/*` are linked into the root `node_modules`, so any deck at any folder depth loads them by name). A deck picks its look in frontmatter — change the one line to reskin the whole deck:
 
@@ -157,7 +209,7 @@ addons: ['deck-core', 'deck-variant-print']   # print (monochrome paper — blac
 - **Core is shared and never duplicated** — fixing a component or adding a feature in `core/` applies to every look at once.
 - **Add a new look** = add `variants/<name>/`: copy a palette file (e.g. `palette-flat.css`), change the values, add a 2-line `styles/index.ts` and a minimal `package.json` named `deck-variant-<name>`, add `"deck-variant-<name>": "workspace:*"` to the root `package.json` and `pnpm install`, then `addons: ['deck-core', 'deck-variant-<name>']`.
 
-## Project structure
+## 7. Project structure
 
 ```
 .gitignore              Whitelist — tracks only the items below (see "What gets committed")
@@ -191,7 +243,7 @@ decks/                  One folder per presentation — slides.md (entry) + page
 
 Present on disk but **gitignored** (not committed): every other folder under `decks/` — your own presentations, each with its `slides.md`, `pages/`, `public/`, and optional `data/` — plus `node_modules/`, `dist/`, `.preview/` (the local preview staged by `pnpm preview:pages`), and `.claude/` (the authoring skill).
 
-## What gets committed (the whitelist)
+## 8. What gets committed (the whitelist)
 
 `.gitignore` ignores **everything** by default, then re-includes only the toolkit, the two reference decks, and the config. The mechanism is a whitelist:
 
@@ -231,7 +283,7 @@ A new deck runs the moment you create it, but `git status` won't see it until yo
 
 That re-include works because `decks/` itself is already re-included (`!/decks/` + `/decks/*` in the whitelist above) — git won't descend into a directory unless its parent is re-included first. One folder = one line; everything inside it (slides.md, pages/, public/, data/) comes along.
 
-## Editing
+## 9. Editing
 
 Decks are plain Markdown — edit a deck's `slides.md` or its `pages/*.md` and the dev server hot-reloads. Split a large deck into files under its `pages/` and pull each section in with the `src:` frontmatter key:
 
@@ -254,7 +306,7 @@ fonts:
   local: "Hiragino Kaku Gothic ProN, Yu Gothic, Hiragino Mincho ProN, Yu Mincho"
 ```
 
-## Convert an existing Markdown file into a deck
+## 10. Convert an existing Markdown file into a deck
 
 Have a plain Markdown file you want turned into a deck in this repo's format? In Claude Code, the `slidev-deck-authoring` skill (in `.claude/skills/`) knows the conventions. Paste a prompt like this, swapping in your filename:
 
@@ -283,7 +335,7 @@ decks/AAA/public/…            assets, mirroring source folders, referenced as 
 
 Converted decks are **gitignored by default** — whitelist them as shown in [Tracking a new deck](#tracking-a-new-deck) if you want them committed. The skill itself lives under `.claude/`, which is also gitignored, so it's available locally but doesn't ship with a clone.
 
-## Reusing this toolkit elsewhere
+## 11. Reusing this toolkit elsewhere
 
 The shared components, the `section` / `multicolumns` layouts, and the design tokens are written to be portable. Three ways to reuse them, in order of effort.
 
