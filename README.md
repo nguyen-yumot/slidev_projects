@@ -1,8 +1,8 @@
 # Slidev deck toolkit
 
-A [Slidev](https://sli.dev) workspace with a small, reusable component toolkit baked in. The toolkit is a shared **`core/`** (components, layouts, structural styles + the default *flat* palette) plus look **variants** under `variants/` (`glass`, `minimal`, `print`); a deck opts in through its `addons:` frontmatter and switches looks by changing that one line — see [Looks](#6-looks). Each presentation is a self-contained folder under **`decks/`**. Two reference decks ship with it: `decks/template/` walks through every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev itself.
+A [Slidev](https://sli.dev) workspace with a reusable component toolkit baked in. The toolkit is a shared **`core/`** (components, layouts, structural styles, and the default *flat* palette) plus look **variants** under `variants/` — `glass`, `minimal`, `print`. A deck opts in through its `addons:` frontmatter and reskins by changing that one line (see [Looks](#6-looks)). Each presentation is a self-contained folder under **`decks/`**. Two reference decks ship with it: `decks/template/` walks through every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev itself.
 
-The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the config — and ignores everything else by default. You can author as many of your own decks as you like; they run locally but won't be committed unless you opt them in. See [What gets committed](#8-what-gets-committed-the-whitelist).
+The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the config — everything else is ignored by default. Author as many of your own decks as you like; they run locally but aren't committed unless you opt them in (see [What gets committed](#8-what-gets-committed-the-whitelist)).
 
 ## Contents
 
@@ -20,7 +20,11 @@ The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference
 
 ## 1. Quick start
 
+Clone the repo from GitHub, then install and run:
+
 ```bash
+git clone https://github.com/nguyen-yumot/slidev_projects.git
+cd slidev_projects
 pnpm install                       # one-time: install dependencies (links the toolkit packages)
 pnpm dev:template                  # run the starter deck (decks/template/)
 pnpm dev decks/tutorial/slides.md  # run a specific deck — pass its entry file
@@ -37,12 +41,50 @@ Every folder under `decks/` is one presentation; its entry file is always `decks
 | `decks/template/` | Starter walk-through of the component toolkit | `pnpm dev:template` |
 | `decks/tutorial/` | Beginner-to-advanced guide to Slidev itself | `pnpm dev decks/tutorial/slides.md` |
 
-To add another deck, copy the starter — `cp -R decks/template decks/your-deck` — set the headmatter `title`, and run `pnpm dev decks/your-deck/slides.md`. In its headmatter keep `theme: default` and `addons: ['deck-core', 'deck-variant-glass']` (or `['deck-core']` for the flat look) — **without an `addons:` line the deck gets no toolkit** (no components, no styling). It runs immediately, but is **gitignored by default** — opt it in if you want it committed ([details below](#tracking-a-new-deck)). Split sections out into the deck's `pages/` and pull each in via the `src:` frontmatter key — see [Editing](#9-editing).
+To add another deck, copy the starter — `cp -R decks/template decks/your-deck` — set its headmatter `title`, and run `pnpm dev decks/your-deck/slides.md`. Keep `theme: default` and `addons: ['deck-core', 'deck-variant-glass']` (or `['deck-core']` for the flat look) — **without an `addons:` line the deck gets no toolkit**: no components, no styling. It runs immediately but is **gitignored by default** — [opt it in](#tracking-a-new-deck) to commit it. Split sections into the deck's `pages/` and pull each in via the `src:` key — see [Editing](#9-editing).
 
 ## 2. Prerequisites
 
+Three free tools:
+
+- [Git](https://git-scm.com) — to clone the repo
 - [Node.js](https://nodejs.org) 20.12 or newer (required by Slidev v52)
-- [pnpm](https://pnpm.io) — `npm install -g pnpm`
+- [pnpm](https://pnpm.io) — the package manager this repo uses
+
+### Installing them
+
+Pick your platform. Each one-liner installs Git and Node.js; pnpm then comes from `npm` (which ships with Node), so it's the same everywhere.
+
+**macOS** — via [Homebrew](https://brew.sh):
+
+```bash
+brew install git node          # Git + Node.js
+npm install -g pnpm            # pnpm (npm comes with Node)
+```
+
+**Windows** — via [winget](https://learn.microsoft.com/windows/package-manager/) (built into Windows 10/11), in PowerShell:
+
+```powershell
+winget install Git.Git OpenJS.NodeJS   # Git + Node.js (reopen the terminal afterward)
+npm install -g pnpm                     # pnpm
+```
+
+**Linux** (Debian/Ubuntu) — the distro's Node can be too old for Slidev v52, so install Node 20 from [NodeSource](https://github.com/nodesource/distributions):
+
+```bash
+sudo apt update && sudo apt install -y git curl
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+npm install -g pnpm
+```
+
+Then confirm the versions:
+
+```bash
+git --version     # any recent version
+node --version    # must be v20.12 or newer
+pnpm --version    # any version prints = installed OK
+```
 
 ## 3. Commands
 
@@ -125,6 +167,8 @@ https://<owner>.github.io/<repo>/statistics/
 
 **To update later**, repeat steps 1 and 4 — step 5 is one-time.
 
+> **Deployed but don't see the change?** It's almost always your browser cache, not a failed deploy. GitHub Pages serves each page with `Cache-Control: max-age=600`, so for up to ~10 minutes your browser keeps showing the old version (a brand-new deck can be missing from the landing page, or an edited one can look unchanged). The site itself updates within a minute or two of the deploy. To see it right away: **hard-refresh** (<kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>), open the link in a private window, or append a throwaway query like `?v=2`. To check what GitHub is *actually* serving — independent of your browser — confirm the deck folder reached the branch with `git ls-remote --heads origin gh-pages` (the commit hash changes on a successful push) or fetch the headers with `curl -sI https://<owner>.github.io/<repo>/`.
+
 > **Public vs private.** Your `.md` source is never pushed, but a published deck's rendered slides and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
 
 ### If publishing fails
@@ -200,7 +244,7 @@ addons: ['deck-core', 'deck-variant-print']   # print (monochrome paper — blac
 | `minimal` | Flat's teal palette with **zero** shadows/blur/gradients/transparency | Large decks whose exported PDFs must open instantly |
 | `print` | Monochrome paper — ink on white, grayscale callouts, hairline borders | Handout-style decks and print-first PDFs |
 
-**All four looks export fast PDFs.** Two things make a big exported deck slow to view (pages opening blank, filling in gradually, re-rendering when you page back): **effects** — backdrop blur, blend modes, alpha gradients and translucent fills become transparency groups, soft masks, and per-pixel PostScript shadings in the PDF — and **fonts** — system fonts (macOS San Francisco) and Google-served variable fonts (multi-weight requests for Inter, Roboto, JetBrains Mono…) can't be subset-embedded by Chromium, so every glyph ships as a slow Type 3 outline font. The looks handle this differently:
+**All four looks export fast PDFs.** Two things make a big exported deck slow to view — pages opening blank, filling in gradually, re-rendering as you page back: **effects** (backdrop blur, blend modes, alpha gradients and translucent fills become transparency groups, soft masks, and per-pixel PostScript shadings) and **fonts** (system fonts like macOS San Francisco, and Google-served variable fonts — multi-weight Inter, Roboto, JetBrains Mono… — can't be subset-embedded by Chromium, so every glyph ships as a slow Type 3 outline). The looks handle this differently:
 
 - `minimal` and `print` are built lean: only opaque flat colours and static web fonts (Lato + IBM Plex Mono) everywhere — screen and PDF are the same.
 - `flat` and `glass` keep their full effects on screen and swap in cheap equivalents **only under print media** (`@media print` blocks in their palettes, which is what PDF export renders with): precomposited opaque fills, gradient dividers without the grain/glow texture, no backdrop blur, and static fonts (flat's PDFs use Inter in place of San Francisco; glass requests its own fonts one weight per `@import`, which makes Google serve static files). The exported pages look almost identical, minus the subtle texture effects.
