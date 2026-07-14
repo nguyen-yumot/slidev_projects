@@ -1,5 +1,6 @@
 ---
 layout: section
+routeAlias: part-1
 ---
 
 <Eyebrow>Part 1</Eyebrow>
@@ -292,12 +293,16 @@ see this text beside the slide. Try it: run the deck and open /presenter.
 <div><KeyCap>o</KeyCap> &nbsp; Slide overview — see them all</div>
 <div><KeyCap>f</KeyCap> &nbsp; Toggle fullscreen</div>
 <div><KeyCap>d</KeyCap> &nbsp; Toggle dark mode</div>
-<div><KeyCap>g</KeyCap> &nbsp; Jump to a slide by number</div>
+<div><KeyCap>g</KeyCap> &nbsp; Jump to a slide by number or title</div>
 
 </div>
 
 <Callout type="tip">
 Hover the bottom-left corner of any slide to reveal a navigation bar with the same controls.
+</Callout>
+
+<Callout type="tip" class="mt-3">
+Press <KeyCap>g</KeyCap> then <KeyCap>Space</KeyCap> to list every slide by its title — or type any word from a title to filter, then <KeyCap>Enter</KeyCap> or click to jump. Handy on a long deck, where the <KeyCap>o</KeyCap> overview grid gets cramped.
 </Callout>
 
 ---

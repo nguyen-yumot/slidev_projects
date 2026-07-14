@@ -33,25 +33,52 @@ layout: default
 
 This tutorial is one continuous path, split into four tracks. Every feature is demonstrated live on the slide that explains it.
 
-<div class="grid grid-cols-2 gap-4 pt-4">
+<div class="grid grid-cols-2 gap-4 pt-4 wyl-cards">
 
-<FeatureCard title="1 · Beginner" icon="i-carbon-rocket" row>
+<Link to="part-1">
+
+<FeatureCard title="1 · Beginner" icon="i-carbon-rocket" row interactive>
 Install Slidev, write Markdown, master the built-in layouts.
 </FeatureCard>
 
-<FeatureCard title="2 · Intermediate" icon="i-carbon-code" row>
+</Link>
+
+<Link to="part-2">
+
+<FeatureCard title="2 · Intermediate" icon="i-carbon-code" row interactive>
 Click animations, live code, diagrams, math, icons, and media.
 </FeatureCard>
 
-<FeatureCard title="3 · Advanced" icon="i-carbon-tools" row>
+</Link>
+
+<Link to="part-3">
+
+<FeatureCard title="3 · Advanced" icon="i-carbon-tools" row interactive>
 Custom layouts and components, theming, exporting, cheat sheet.
 </FeatureCard>
 
-<FeatureCard title="4 · Toolkit" icon="i-carbon-cube" row>
+</Link>
+
+<Link to="part-4">
+
+<FeatureCard title="4 · Toolkit" icon="i-carbon-cube" row interactive>
 The deck's own component library — and how to grow your own.
 </FeatureCard>
 
+</Link>
+
 </div>
+
+<style>
+/* Make each "What you'll learn" card a clickable jump target without the
+   default accent link colour/underline — the card keeps its own styling. */
+.wyl-cards a {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+</style>
 
 <div class="pt-5">
 

@@ -1,5 +1,6 @@
 ---
 layout: section
+routeAlias: part-2
 ---
 
 <Eyebrow>Part 2</Eyebrow>
