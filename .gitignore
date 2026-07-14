@@ -48,3 +48,6 @@ dist/
 .DS_Store
 *.swp
 *.log
+
+# Track the git-github deck (opted in — public in this repo).
+!/decks/git-github/
