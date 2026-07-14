@@ -13,6 +13,7 @@
 
 # ...and these root files only.
 !/.gitignore
+!/CLAUDE.md
 !/package.json
 !/pnpm-lock.yaml
 !/pnpm-workspace.yaml
