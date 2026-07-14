@@ -66,8 +66,20 @@ if ! node -e "require.resolve('playwright-chromium/package.json')" >/dev/null 2>
   exit 1
 fi
 
+# Warn about companion docs pointing at a deck that isn't published — they'd never attach to a
+# card (each doc is emitted under its deck below, so an unpublished deck means the doc vanishes).
+for entry in "${DOCS[@]:-}"; do
+  [ -n "$entry" ] || continue
+  IFS='|' read -r DOC_DECK _ _ _ <<< "$entry"
+  case " ${DECKS[*]} " in
+    *" $DOC_DECK "*) : ;;
+    *) echo "deploy.sh: doc references deck '$DOC_DECK' which isn't in DECKS — it won't appear. Add it to DECKS." >&2 ;;
+  esac
+done
+
 rm -rf dist                       # rebuild-all: start clean every run
 cards=""
+reader_decks=""                   # deck folders that get an in-site Markdown reader (set in the loop)
 i=0
 for entry in "${DECKS[@]}"; do
   parse_deck "$entry"
@@ -109,55 +121,59 @@ for entry in "${DECKS[@]}"; do
   #   --with-clicks: one page per slide at its final built state, matching the manual /export default.
   node scripts/export-pdf.mjs "$DECK_FILE" "dist/$DECK_NAME/$PDF_FILE"
 
-  # Card = container div with two links: the deck (most of the row) and a small
-  # PDF pill. (A nested <a> inside an <a> is invalid, hence the two siblings.)
-  cards="$cards
-      <div class=\"card\">
-        <a class=\"card-main\" href=\"./$DECK_NAME/\">
-          <span class=\"card-index\">$idx</span>
-          <span class=\"card-body\">
-            <span class=\"card-name\">$DECK_TITLE</span>
-            <span class=\"card-path\">/$DECK_NAME/</span>
-          </span>
-        </a>
-        <a class=\"card-pdf\" href=\"./$DECK_NAME/$PDF_HREF\" download=\"$PDF_DOWNLOAD\">PDF</a>
-      </div>"
-done
+  # Deck card = two sibling links: the deck (most of the row) and a small PDF pill.
+  # (A nested <a> inside an <a> is invalid, hence the two siblings.)
+  deck_card="<div class=\"card\">
+          <a class=\"card-main\" href=\"./$DECK_NAME/\">
+            <span class=\"card-index\">$idx</span>
+            <span class=\"card-body\">
+              <span class=\"card-name\">$DECK_TITLE</span>
+              <span class=\"card-path\">/$DECK_NAME/</span>
+            </span>
+          </a>
+          <a class=\"card-pdf\" href=\"./$DECK_NAME/$PDF_HREF\" download=\"$PDF_DOWNLOAD\">PDF</a>
+        </div>"
 
-# ── Publish companion documents (the DOCS list). Copy each into its deck's published folder
-#    (so the ".md" downloads same-origin) and build a landing-page card that links to the
-#    in-site reader (view) and the raw file (download). The reader page (read.html) is
-#    written once into each deck folder that has at least one doc.
-doc_cards=""
-reader_decks=""
-for entry in "${DOCS[@]:-}"; do
-  [ -n "$entry" ] || continue
-  IFS='|' read -r DOC_DECK DOC_FILE DOC_TITLE DOC_DESC <<< "$entry"
-  DOC_SRC="decks/$DOC_DECK/$DOC_FILE"
-  if [ ! -f "$DOC_SRC" ]; then
-    echo "deploy.sh: doc source missing, skipping: $DOC_SRC" >&2; continue
+  # Companion documents that BELONG TO this deck (matched by folder in the DOCS list): each is
+  # copied into the deck's published folder (so its ".md" downloads same-origin) and rendered as
+  # a rail-connected sub-row beneath the deck card — the in-site reader (view) + a raw ".md" pill.
+  subdocs=""
+  for dentry in "${DOCS[@]:-}"; do
+    [ -n "$dentry" ] || continue
+    IFS='|' read -r DOC_DECK DOC_FILE DOC_TITLE DOC_DESC <<< "$dentry"
+    [ "$DOC_DECK" = "$DECK_NAME" ] || continue      # only this deck's docs
+    DOC_SRC="decks/$DOC_DECK/$DOC_FILE"
+    if [ ! -f "$DOC_SRC" ]; then
+      echo "deploy.sh: doc source missing, skipping: $DOC_SRC" >&2; continue
+    fi
+    echo "  ↳ companion doc  $DOC_SRC  →  dist/$DECK_NAME/$DOC_FILE"
+    cp "$DOC_SRC" "dist/$DECK_NAME/$DOC_FILE"
+    case " $reader_decks " in *" $DECK_NAME "*) : ;; *) reader_decks="$reader_decks $DECK_NAME" ;; esac
+    DOC_HREF=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DOC_FILE")
+    DOC_TITLE_H=$(html_escape "$DOC_TITLE")
+    DOC_FILE_H=$(html_escape "$DOC_FILE")
+    subdocs="$subdocs
+            <div class=\"subdoc\">
+              <a class=\"subdoc-main\" href=\"./$DECK_NAME/read.html#$DOC_HREF\">
+                <span class=\"subdoc-ico\" aria-hidden=\"true\"></span>
+                <span class=\"subdoc-name\">$DOC_TITLE_H</span>
+              </a>
+              <a class=\"subdoc-md\" href=\"./$DECK_NAME/$DOC_HREF\" download=\"$DOC_FILE_H\">MD</a>
+            </div>"
+  done
+
+  # Wrap this deck's docs in the rail container (empty when the deck has none).
+  group_docs=""
+  if [ -n "$subdocs" ]; then
+    group_docs="
+          <div class=\"subdocs\">$subdocs
+          </div>"
   fi
-  if [ ! -d "dist/$DOC_DECK" ]; then
-    echo "deploy.sh: doc's deck '$DOC_DECK' isn't published (add it to DECKS) — skipping $DOC_FILE" >&2; continue
-  fi
-  echo "▶ publishing doc  $DOC_SRC  →  dist/$DOC_DECK/$DOC_FILE  (+ in-site reader)"
-  cp "$DOC_SRC" "dist/$DOC_DECK/$DOC_FILE"
-  case " $reader_decks " in *" $DOC_DECK "*) : ;; *) reader_decks="$reader_decks $DOC_DECK" ;; esac
-  DOC_HREF=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DOC_FILE")
-  DOC_TITLE_H=$(html_escape "$DOC_TITLE")
-  DOC_DESC_H=$(html_escape "$DOC_DESC")
-  DOC_FILE_H=$(html_escape "$DOC_FILE")
-  # Card = reader link (most of the row) + a small "MD" download pill, mirroring the deck cards.
-  doc_cards="$doc_cards
-      <div class=\"card\">
-        <a class=\"card-main\" href=\"./$DOC_DECK/read.html#$DOC_HREF\">
-          <span class=\"card-doc\" aria-hidden=\"true\"></span>
-          <span class=\"card-body\">
-            <span class=\"card-name\">$DOC_TITLE_H</span>
-            <span class=\"card-note\">$DOC_DESC_H</span>
-          </span>
-        </a>
-        <a class=\"card-pdf\" href=\"./$DOC_DECK/$DOC_HREF\" download=\"$DOC_FILE_H\">MD</a>
+
+  # Group = the deck card plus any companion docs nested beneath it.
+  cards="$cards
+      <div class=\"group\">
+        $deck_card$group_docs
       </div>"
 done
 
@@ -292,17 +308,6 @@ for rd in $reader_decks; do
 READER
 done
 
-# Optional "Companion documents" section for the landing page (empty when no docs published).
-docs_section=""
-if [ -n "$doc_cards" ]; then
-  docs_section="
-    <section class=\"docs\">
-      <p class=\"sect\">Companion documents</p>
-      <div class=\"list\">$doc_cards
-      </div>
-    </section>"
-fi
-
 count=${#DECKS[@]}
 if [ "$count" -eq 1 ]; then noun="presentation"; else noun="presentations"; fi
 
@@ -364,14 +369,18 @@ cat > dist/index.html <<EOF
     font-size: clamp(2.4rem, 6vw, 3.6rem);
     font-family: ui-serif, "New York", "Iowan Old Style", Georgia, Cambria, "Times New Roman", serif;
   }
-  .list { display: flex; flex-direction: column; gap: clamp(.55rem, 1.3vw, .85rem); }
+  .list { display: flex; flex-direction: column; gap: clamp(.85rem, 2vw, 1.3rem); }
+  /* A deck and its companion documents form one group; the group is what rises in on load. */
+  .group {
+    display: flex; flex-direction: column;
+    animation: rise .55s cubic-bezier(.22,.61,.36,1) backwards;
+  }
   .card {
     display: flex; align-items: stretch; gap: clamp(.6rem, 1.6vw, 1rem);
     padding: clamp(1rem, 2.4vw, 1.3rem) clamp(1.1rem, 2.6vw, 1.55rem);
     background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
     box-shadow: var(--shadow);
     transition: transform .2s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, border-color .2s ease;
-    animation: rise .55s cubic-bezier(.22,.61,.36,1) backwards;
   }
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--accent-line); }
   .card-main {
@@ -407,31 +416,61 @@ cat > dist/index.html <<EOF
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: .8rem; color: var(--muted); word-break: break-all;
   }
-  /* Companion-document cards: a document glyph (mask, so it recolours on hover) + a prose note. */
-  .card-doc {
-    width: 20px; height: 20px; flex: none; align-self: start; margin-top: .12rem;
+  /* Companion documents: lighter, indented rows nested under their deck, joined by a left rail
+     that reads as "these belong to the card above". Flatter than a deck card (no shadow). */
+  .subdocs {
+    display: flex; flex-direction: column; gap: clamp(.35rem, .9vw, .5rem);
+    margin: clamp(.5rem, 1.2vw, .7rem) 0 .1rem clamp(1.5rem, 3.4vw, 2.15rem);
+    padding-left: clamp(.9rem, 2vw, 1.2rem);
+    border-left: 2px solid var(--line);
+  }
+  .subdoc {
+    display: flex; align-items: center; gap: clamp(.5rem, 1.4vw, .75rem);
+    padding: clamp(.55rem, 1.4vw, .72rem) clamp(.85rem, 2vw, 1.05rem);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 11px;
+    transition: transform .2s cubic-bezier(.22,.61,.36,1), border-color .2s ease, background .2s ease;
+  }
+  .subdoc:hover { transform: translateX(2px); border-color: var(--accent-line); background: var(--tint); }
+  .subdoc-main {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: clamp(.55rem, 1.5vw, .8rem);
+    text-decoration: none; color: inherit;
+  }
+  .subdoc-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  /* Document glyph (mask, so it recolours on hover). */
+  .subdoc-ico {
+    width: 17px; height: 17px; flex: none;
     background: var(--faint);
     -webkit-mask: var(--doc-ico) center / contain no-repeat;
             mask: var(--doc-ico) center / contain no-repeat;
     transition: background .2s ease;
   }
-  .card:hover .card-doc { background: var(--accent); }
-  .card-note { font-size: .84rem; color: var(--muted); line-height: 1.5; }
-  .docs { margin-top: clamp(1.7rem, 4vw, 2.5rem); }
-  .sect {
-    margin: 0 0 .9rem; color: var(--accent); font-size: .72rem;
-    font-weight: 700; text-transform: uppercase; letter-spacing: .2em;
+  .subdoc:hover .subdoc-ico { background: var(--accent); }
+  .subdoc-name {
+    min-width: 0; font-size: clamp(.9rem, 2.1vw, 1rem); font-weight: 600;
+    letter-spacing: -.005em; line-height: 1.35; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: color .2s ease;
   }
+  .subdoc:hover .subdoc-name { color: var(--accent-2); }
+  .subdoc-md {
+    flex: none; align-self: center;
+    padding: .32rem .72rem; border: 1px solid var(--line); border-radius: 8px;
+    font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .subdoc-md:hover { color: var(--accent); border-color: var(--accent-line); background: var(--tint); }
+  .subdoc-md:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .foot { margin-top: auto; padding-top: 3rem; color: var(--faint); font-size: .82rem; }
   .foot a { color: var(--accent); text-decoration: none; }
   .foot a:hover { text-decoration: underline; }
   @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .card:nth-child(1){animation-delay:.05s} .card:nth-child(2){animation-delay:.11s}
-  .card:nth-child(3){animation-delay:.17s} .card:nth-child(4){animation-delay:.23s}
-  .card:nth-child(5){animation-delay:.29s} .card:nth-child(6){animation-delay:.35s}
+  .list > .group:nth-child(1){animation-delay:.05s} .list > .group:nth-child(2){animation-delay:.11s}
+  .list > .group:nth-child(3){animation-delay:.17s} .list > .group:nth-child(4){animation-delay:.23s}
+  .list > .group:nth-child(5){animation-delay:.29s} .list > .group:nth-child(6){animation-delay:.35s}
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
-    .card:hover { transform: none; }
+    .card:hover, .subdoc:hover { transform: none; }
   }
 </style>
 </head>
@@ -442,7 +481,7 @@ cat > dist/index.html <<EOF
       <p class="eyebrow">$count $noun</p>
     </header>
     <section class="list">$cards
-    </section>$docs_section
+    </section>
     <footer class="foot">Built with <a href="https://sli.dev">Slidev</a></footer>
   </main>
 </body>
