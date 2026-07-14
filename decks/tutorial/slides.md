@@ -70,13 +70,15 @@ The deck's own component library — and how to grow your own.
 </div>
 
 <style>
-/* Make each "What you'll learn" card a clickable jump target without the
-   default accent link colour/underline — the card keeps its own styling. */
-.wyl-cards a {
+/* Each "What you'll learn" card is a clickable jump target: strip the default
+   link styling — accent colour, and Slidev's dashed border-bottom "underline"
+   (client styles/layouts-base.css) — so only the card's own styling shows. */
+.slidev-layout .wyl-cards a {
   display: block;
   height: 100%;
   text-decoration: none;
   color: inherit;
+  border: none;
 }
 </style>
 
