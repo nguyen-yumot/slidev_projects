@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 520" width="1280" height="520" role="img">
+  <path d="M208,260 C249,260 249,48.25 290,48.25" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,108.75 290,108.75" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,169.25 290,169.25" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,229.75 290,229.75" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,290.25 290,290.25" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,350.75 290,350.75" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,411.25 290,411.25" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M208,260 C249,260 249,471.75 290,471.75" fill="none" stroke="#2b90b6" stroke-opacity="0.4" stroke-width="2"/>
+  <rect x="22" y="220" width="186" height="80" rx="18" fill="#2b90b6"/>
+  <text x="115" y="260" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Git &amp; GitHub</text>
+  <rect x="290" y="23.3" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="48.3" r="13" fill="#2b90b6"/>
+  <text x="316" y="48.3" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">1</text>
+  <text x="338" y="48.3" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Fundamentals</text>
+  <text x="560" y="48.3" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Git vs GitHub · version control · distributed · AI safety net</text>
+  <rect x="290" y="83.8" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="108.8" r="13" fill="#2b90b6"/>
+  <text x="316" y="108.8" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">2</text>
+  <text x="338" y="108.8" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">The four locations</text>
+  <text x="560" y="108.8" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">working dir · staging · local repo · remote</text>
+  <rect x="290" y="144.3" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="169.3" r="13" fill="#2b90b6"/>
+  <text x="316" y="169.3" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">3</text>
+  <text x="338" y="169.3" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Local workflow</text>
+  <text x="560" y="169.3" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">init · clone · add · commit · status · log</text>
+  <rect x="290" y="204.8" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="229.8" r="13" fill="#2b90b6"/>
+  <text x="316" y="229.8" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">4</text>
+  <text x="338" y="229.8" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">GitHub &amp; syncing</text>
+  <text x="560" y="229.8" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">push · fetch vs pull · origin / main</text>
+  <rect x="290" y="265.3" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="290.3" r="13" fill="#2b90b6"/>
+  <text x="316" y="290.3" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">5</text>
+  <text x="338" y="290.3" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Branching &amp; PRs</text>
+  <text x="560" y="290.3" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">branch · merge · conflicts · Pull Requests · forking · rebase</text>
+  <rect x="290" y="325.8" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="350.8" r="13" fill="#2b90b6"/>
+  <text x="316" y="350.8" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">6</text>
+  <text x="338" y="350.8" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Safety nets</text>
+  <text x="560" y="350.8" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">stash · restore · revert · reset</text>
+  <rect x="290" y="386.3" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="411.3" r="13" fill="#2b90b6"/>
+  <text x="316" y="411.3" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">7</text>
+  <text x="338" y="411.3" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Setup &amp; security</text>
+  <text x="560" y="411.3" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">SSH keys · .gitignore · secrets · default branch</text>
+  <rect x="290" y="446.8" width="244" height="50" rx="11" fill="#eef6fb" stroke="rgba(43,144,182,0.28)" stroke-width="1.5"/>
+  <circle cx="316" cy="471.8" r="13" fill="#2b90b6"/>
+  <text x="316" y="471.8" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">8</text>
+  <text x="338" y="471.8" font-size="15" font-weight="700" fill="#0f172a" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Best practices &amp; tools</text>
+  <text x="560" y="471.8" font-size="13" fill="#475569" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">small commits · protect main · CLI · GUI · CI/CD · Obsidian</text>
+</svg>

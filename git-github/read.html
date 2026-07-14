@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading…</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfc; --surface: #ffffff;
+    --ink: #14161b; --muted: #4b5563; --faint: #9aa1ad;
+    --line: #e7e8ec; --accent: #0f766e; --accent-2: #0d9488;
+    --tint: rgba(15,118,110,.05); --code-bg: #f4f5f7;
+    --shadow: 0 1px 2px rgba(20,22,27,.04), 0 10px 30px rgba(20,22,27,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11; --surface: #14171f;
+      --ink: #f3f5f7; --muted: #b4bcc8; --faint: #5d6577;
+      --line: #222732; --accent: #2dd4bf; --accent-2: #5eead4;
+      --tint: rgba(45,212,191,.07); --code-bg: #171b22;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.42);
+    }
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+  html,body { margin: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); line-height: 1.7; min-height: 100vh;
+    background: radial-gradient(1000px 560px at 100% -8%, var(--tint), transparent 72%), var(--bg);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  .topbar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .75rem clamp(1rem, 4vw, 2rem);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .back { display: inline-flex; align-items: center; gap: .4rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 600; }
+  .back:hover { color: var(--accent); }
+  .dl {
+    text-decoration: none; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: .45rem .85rem; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); white-space: nowrap;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .dl:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); background: var(--tint); }
+  main { max-width: 720px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 2.6rem) clamp(1.15rem, 5vw, 1.5rem) 5rem; }
+  .doc > :first-child { margin-top: 0; }
+  .doc h1 {
+    font-family: ui-serif, "New York", "Iowan Old Style", Georgia, Cambria, "Times New Roman", serif;
+    font-weight: 600; letter-spacing: -.015em; line-height: 1.1; font-size: clamp(1.9rem, 5vw, 2.6rem); margin: .1rem 0 1.1rem;
+  }
+  .doc h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.01em; margin: 2.2rem 0 .8rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); }
+  .doc h3 { font-size: 1.12rem; font-weight: 700; margin: 1.6rem 0 .5rem; }
+  .doc p { margin: .85rem 0; }
+  .doc a { color: var(--accent); text-underline-offset: 3px; }
+  .doc ul, .doc ol { padding-left: 1.35rem; }
+  .doc li { margin: .3rem 0; }
+  .doc em { color: var(--muted); }
+  .doc strong { color: var(--ink); font-weight: 700; }
+  .doc blockquote { margin: 1rem 0; padding: .5rem 1rem; border-left: 3px solid var(--accent); background: var(--tint); border-radius: 0 8px 8px 0; color: var(--muted); }
+  .doc :not(pre) > code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px; padding: .1em .38em; }
+  .doc pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.15rem; overflow-x: auto; }
+  .doc pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
+  .doc table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .92rem; }
+  .doc th, .doc td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; }
+  .doc th { background: var(--tint); }
+  .doc hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+  .doc .mermaid { display: flex; justify-content: center; margin: 1.4rem 0; padding: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow-x: auto; }
+  .doc .mermaid svg { max-width: 100%; height: auto; }
+  .status { color: var(--faint); padding: 2rem 0; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="../">← All presentations</a>
+    <a class="dl" id="dl" href="#" download>Download .md</a>
+  </div>
+  <main><article class="doc" id="doc"><p class="status">Loading…</p></article></main>
+
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
+    const el = document.getElementById('doc')
+    const dl = document.getElementById('dl')
+    const fail = (m) => { el.innerHTML = '<p class="status">' + m + '</p>' }
+    // The doc is named in the URL HASH (read.html#story.md), not a query — a hash survives the
+    // clean-URL 301 that `serve` (the local preview) does to read.html, and works on GitHub
+    // Pages too. Accept only a bare "<name>.md" in THIS folder — strip anything pointing elsewhere.
+    let file = ''
+    try { file = decodeURIComponent((location.hash || '').replace(/^#/, '')) } catch (_) { file = '' }
+    file = file.replace(/[^\w.\-]/g, '')
+    if (!/^[\w.\-]+\.md$/.test(file)) {
+      fail('No document specified.')
+    } else {
+      dl.href = file; dl.setAttribute('download', file)
+      try {
+        const res = await fetch(file, { cache: 'no-cache' })
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        const src = await res.text()
+        const md = window.markdownit({ html: false, linkify: true, typographer: true })
+        const base = md.renderer.rules.fence || ((t, i, o, e, s) => s.renderToken(t, i, o))
+        md.renderer.rules.fence = (t, i, o, e, s) =>
+          t[i].info.trim() === 'mermaid'
+            ? '<pre class="mermaid">' + md.utils.escapeHtml(t[i].content) + '</pre>'
+            : base(t, i, o, e, s)
+        el.innerHTML = md.render(src)
+        const h1 = el.querySelector('h1')
+        if (h1) document.title = h1.textContent.trim()
+        const dark = matchMedia('(prefers-color-scheme: dark)').matches
+        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: dark ? 'dark' : 'default' })
+        await mermaid.run({ querySelector: '.doc .mermaid' })
+      } catch (err) {
+        fail('Could not load “' + file + '”. ' + (err && err.message ? '(' + err.message + ')' : ''))
+      }
+    }
+  </script>
+</body>
+</html>

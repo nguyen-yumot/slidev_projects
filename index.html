@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presentations</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfc; --surface: #ffffff;
+    --ink: #14161b; --muted: #6b7280; --faint: #9aa1ad;
+    --line: #ececef; --accent: #0f766e; --accent-2: #0d9488;
+    --accent-line: rgba(15,118,110,.34);
+    --tint: rgba(15,118,110,.05);
+    --shadow: 0 1px 2px rgba(20,22,27,.04), 0 14px 34px rgba(20,22,27,.05);
+    --shadow-hover: 0 12px 26px rgba(15,118,110,.10), 0 34px 64px rgba(15,118,110,.10);
+    --doc-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5'/%3E%3Cpath d='M9 13h6M9 17h6'/%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11; --surface: #14171f;
+      --ink: #f3f5f7; --muted: #98a2b3; --faint: #5d6577;
+      --line: #222732; --accent: #2dd4bf; --accent-2: #5eead4;
+      --accent-line: rgba(45,212,191,.36);
+      --tint: rgba(45,212,191,.07);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.42);
+      --shadow-hover: 0 14px 30px rgba(0,0,0,.5), 0 36px 70px rgba(0,0,0,.55);
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: radial-gradient(1000px 560px at 100% -8%, var(--tint), transparent 72%), var(--bg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  .wrap {
+    max-width: 800px; margin: 0 auto; min-height: 100vh;
+    display: flex; flex-direction: column;
+    padding: clamp(3rem, 7vw, 6rem) clamp(1.35rem, 5vw, 2.5rem) 3.5rem;
+  }
+  .head { margin-bottom: clamp(1.6rem, 4vw, 2.4rem); }
+  .eyebrow {
+    margin: .85rem 0 0; color: var(--accent); font-size: .72rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .2em;
+  }
+  .head h1 {
+    margin: 0; font-weight: 600; letter-spacing: -.015em; line-height: 1.04;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-family: ui-serif, "New York", "Iowan Old Style", Georgia, Cambria, "Times New Roman", serif;
+  }
+  .list { display: flex; flex-direction: column; gap: clamp(.85rem, 2vw, 1.3rem); }
+  /* A deck and its companion documents form one group; the group is what rises in on load. */
+  .group {
+    display: flex; flex-direction: column;
+    animation: rise .55s cubic-bezier(.22,.61,.36,1) backwards;
+  }
+  .card {
+    display: flex; align-items: stretch; gap: clamp(.6rem, 1.6vw, 1rem);
+    padding: clamp(1rem, 2.4vw, 1.3rem) clamp(1.1rem, 2.6vw, 1.55rem);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow);
+    transition: transform .2s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, border-color .2s ease;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--accent-line); }
+  .card-main {
+    flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr;
+    align-items: baseline; gap: clamp(.85rem, 2.5vw, 1.5rem);
+    text-decoration: none; color: inherit;
+  }
+  .card-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  .card-index {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums; font-size: .78rem; font-weight: 600;
+    color: var(--faint); letter-spacing: .04em; padding-top: .2rem;
+    transition: color .2s ease;
+  }
+  .card:hover .card-index { color: var(--accent); }
+  .card-pdf {
+    flex: none; align-self: center;
+    padding: .4rem .8rem; border: 1px solid var(--line); border-radius: 9px;
+    font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .card-pdf:hover { color: var(--accent); border-color: var(--accent-line); background: var(--tint); }
+  .card-pdf:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card-body { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
+  .card-name {
+    font-size: clamp(1.1rem, 2.6vw, 1.28rem); font-weight: 600;
+    letter-spacing: -.01em; line-height: 1.3; color: var(--ink);
+    transition: color .2s ease;
+  }
+  .card:hover .card-name { color: var(--accent-2); }
+  .card-path {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .8rem; color: var(--muted); word-break: break-all;
+  }
+  /* Companion documents: lighter, indented rows nested under their deck, joined by a left rail
+     that reads as "these belong to the card above". Flatter than a deck card (no shadow). */
+  .subdocs {
+    display: flex; flex-direction: column; gap: clamp(.35rem, .9vw, .5rem);
+    margin: clamp(.5rem, 1.2vw, .7rem) 0 .1rem clamp(1.5rem, 3.4vw, 2.15rem);
+    padding-left: clamp(.9rem, 2vw, 1.2rem);
+    border-left: 2px solid var(--line);
+  }
+  .subdoc {
+    display: flex; align-items: center; gap: clamp(.5rem, 1.4vw, .75rem);
+    padding: clamp(.55rem, 1.4vw, .72rem) clamp(.85rem, 2vw, 1.05rem);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 11px;
+    transition: transform .2s cubic-bezier(.22,.61,.36,1), border-color .2s ease, background .2s ease;
+  }
+  .subdoc:hover { transform: translateX(2px); border-color: var(--accent-line); background: var(--tint); }
+  .subdoc-main {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: clamp(.55rem, 1.5vw, .8rem);
+    text-decoration: none; color: inherit;
+  }
+  .subdoc-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  /* Document glyph (mask, so it recolours on hover). */
+  .subdoc-ico {
+    width: 17px; height: 17px; flex: none;
+    background: var(--faint);
+    -webkit-mask: var(--doc-ico) center / contain no-repeat;
+            mask: var(--doc-ico) center / contain no-repeat;
+    transition: background .2s ease;
+  }
+  .subdoc:hover .subdoc-ico { background: var(--accent); }
+  .subdoc-name {
+    min-width: 0; font-size: clamp(.9rem, 2.1vw, 1rem); font-weight: 600;
+    letter-spacing: -.005em; line-height: 1.35; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: color .2s ease;
+  }
+  .subdoc:hover .subdoc-name { color: var(--accent-2); }
+  .subdoc-md {
+    flex: none; align-self: center;
+    padding: .32rem .72rem; border: 1px solid var(--line); border-radius: 8px;
+    font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .subdoc-md:hover { color: var(--accent); border-color: var(--accent-line); background: var(--tint); }
+  .subdoc-md:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .foot { margin-top: auto; padding-top: 3rem; color: var(--faint); font-size: .82rem; }
+  .foot a { color: var(--accent); text-decoration: none; }
+  .foot a:hover { text-decoration: underline; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .list > .group:nth-child(1){animation-delay:.05s} .list > .group:nth-child(2){animation-delay:.11s}
+  .list > .group:nth-child(3){animation-delay:.17s} .list > .group:nth-child(4){animation-delay:.23s}
+  .list > .group:nth-child(5){animation-delay:.29s} .list > .group:nth-child(6){animation-delay:.35s}
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .card:hover, .subdoc:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>Presentations</h1>
+      <p class="eyebrow">3 presentations</p>
+    </header>
+    <section class="list">
+      <div class="group">
+        <div class="card">
+          <a class="card-main" href="./tutorial/">
+            <span class="card-index">01</span>
+            <span class="card-body">
+              <span class="card-name">Slidev Tutorial — Beginner to Advanced</span>
+              <span class="card-path">/tutorial/</span>
+            </span>
+          </a>
+          <a class="card-pdf" href="./tutorial/Slidev%20Tutorial%20%E2%80%94%20Beginner%20to%20Advanced.pdf" download="Slidev Tutorial — Beginner to Advanced.pdf">PDF</a>
+        </div>
+      </div>
+      <div class="group">
+        <div class="card">
+          <a class="card-main" href="./statistics/">
+            <span class="card-index">02</span>
+            <span class="card-body">
+              <span class="card-name">Essential Statistics for Researchers</span>
+              <span class="card-path">/statistics/</span>
+            </span>
+          </a>
+          <a class="card-pdf" href="./statistics/Essential%20Statistics%20for%20Researchers.pdf" download="Essential Statistics for Researchers.pdf">PDF</a>
+        </div>
+          <div class="subdocs">
+            <div class="subdoc">
+              <a class="subdoc-main" href="./statistics/read.html#story.md">
+                <span class="subdoc-ico" aria-hidden="true"></span>
+                <span class="subdoc-name">The Statistics Story</span>
+              </a>
+              <a class="subdoc-md" href="./statistics/story.md" download="story.md">MD</a>
+            </div>
+          </div>
+      </div>
+      <div class="group">
+        <div class="card">
+          <a class="card-main" href="./git-github/">
+            <span class="card-index">03</span>
+            <span class="card-body">
+              <span class="card-name">Git &amp; GitHub for Beginners</span>
+              <span class="card-path">/git-github/</span>
+            </span>
+          </a>
+          <a class="card-pdf" href="./git-github/Git%20%26%20GitHub%20for%20Beginners.pdf" download="Git &amp; GitHub for Beginners.pdf">PDF</a>
+        </div>
+          <div class="subdocs">
+            <div class="subdoc">
+              <a class="subdoc-main" href="./git-github/read.html#story.md">
+                <span class="subdoc-ico" aria-hidden="true"></span>
+                <span class="subdoc-name">The Git Story</span>
+              </a>
+              <a class="subdoc-md" href="./git-github/story.md" download="story.md">MD</a>
+            </div>
+            <div class="subdoc">
+              <a class="subdoc-main" href="./git-github/read.html#glossary.md">
+                <span class="subdoc-ico" aria-hidden="true"></span>
+                <span class="subdoc-name">Glossary</span>
+              </a>
+              <a class="subdoc-md" href="./git-github/glossary.md" download="glossary.md">MD</a>
+            </div>
+          </div>
+      </div>
+    </section>
+    <footer class="foot">Built with <a href="https://sli.dev">Slidev</a></footer>
+  </main>
+</body>
+</html>
