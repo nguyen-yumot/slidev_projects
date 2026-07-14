@@ -17,7 +17,6 @@
 !/pnpm-lock.yaml
 !/pnpm-workspace.yaml
 !/README.md
-!/CLAUDE.md
 
 # Decks live one-per-folder under decks/<name>/ (slides.md + pages/ + public/ + data/).
 # Re-include the dir (so git descends), ignore its contents, then keep only the two
