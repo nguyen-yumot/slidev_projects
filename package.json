@@ -12,13 +12,13 @@
     "deploy:pages": "bash scripts/deploy.sh"
   },
   "dependencies": {
+    "@slidev/cli": "52.17.0",
+    "@slidev/theme-default": "0.25.0",
+    "@slidev/theme-seriph": "^0.25.0",
     "deck-core": "workspace:*",
     "deck-variant-glass": "workspace:*",
     "deck-variant-minimal": "workspace:*",
     "deck-variant-print": "workspace:*",
-    "@slidev/cli": "52.15.2",
-    "@slidev/theme-default": "0.25.0",
-    "@slidev/theme-seriph": "^0.25.0",
     "katex": "0.16.47",
     "vue": "3.5.34"
   },

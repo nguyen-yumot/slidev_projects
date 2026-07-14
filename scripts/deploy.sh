@@ -23,6 +23,7 @@ DECKS=(
 #    The source must be decks/<deck-folder>/<file.md>, and <deck-folder> must be a deck in
 #    DECKS above (the doc is served from that deck's published folder). Leave empty for none.
 DOCS=(
+  "statistics|story.md|The Statistics Story"
   "git-github|story.md|The Git Story|Mai's midnight analysis — the deck's eight stops told as one continuous tale."
   "git-github|glossary.md|Glossary|Every key Git & GitHub term, explained for a first-timer."
 )
