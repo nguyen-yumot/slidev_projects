@@ -1,75 +1,63 @@
 # Slidev deck toolkit
 
-A [Slidev](https://sli.dev) workspace with a reusable component toolkit baked in. The toolkit is a shared **`core/`** (components, layouts, structural styles, and the default *flat* palette) plus look **variants** under `variants/` — `glass`, `minimal`, `print`. A deck opts in through its `addons:` frontmatter and reskins by changing that one line (see [Looks](#6-looks)). Each presentation is a self-contained folder under **`decks/`**. Two reference decks ship with it: `decks/template/` walks through every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev itself.
+A [Slidev](https://sli.dev) workspace with a reusable component toolkit baked in. Each presentation is a self-contained folder under **`decks/`**; every deck shares one **`core/`** toolkit (components, layouts, styles) and picks a **look** — `flat` (default), `glass`, `minimal`, or `print` — by changing a single line. Two reference decks ship with it: `decks/template/` shows every toolkit piece, and `decks/tutorial/` is a beginner-to-advanced guide to Slidev.
 
-The repo is **scoped to the toolkit**: git tracks the toolkit, the two reference decks, and the config — everything else is ignored by default. Author as many of your own decks as you like; they run locally but aren't committed unless you opt them in (see [What gets committed](#8-what-gets-committed-the-whitelist)).
+> **New here?** Do sections **1 → 2 → 3** in order and you'll have a deck running and (optionally) published. Everything after that is reference you can dip into when you need it. Grey **▸ "…"** toggles hide deeper background — open them only if you're curious or stuck.
 
 ## Contents
 
-1. [Quick start](#1-quick-start)
-2. [Prerequisites](#2-prerequisites)
-3. [Commands](#3-commands)
-4. [Publish decks online (GitHub Pages)](#4-publish-decks-online-github-pages)
-5. [Toolkit reference](#5-toolkit-reference)
-6. [Looks](#6-looks)
-7. [Project structure](#7-project-structure)
-8. [What gets committed (the whitelist)](#8-what-gets-committed-the-whitelist)
-9. [Editing](#9-editing)
-10. [Convert an existing Markdown file into a deck](#10-convert-an-existing-markdown-file-into-a-deck)
+**Get going**
+1. [Install the tools (one-time setup)](#1-install-the-tools-one-time-setup)
+2. [Quick start](#2-quick-start)
+3. [Everyday commands](#3-everyday-commands)
+4. [Make your own deck](#4-make-your-own-deck)
+5. [Publish online (GitHub Pages)](#5-publish-online-github-pages)
+
+**Reference**
+6. [Components and layouts](#6-components-and-layouts)
+7. [Looks (change the design)](#7-looks-change-the-design)
+8. [Project structure](#8-project-structure)
+9. [What gets committed (the whitelist)](#9-what-gets-committed-the-whitelist)
+10. [Editing and other topics](#10-editing-and-other-topics)
 11. [Reusing this toolkit elsewhere](#11-reusing-this-toolkit-elsewhere)
 
-## 1. Quick start
+---
 
-Clone the repo from GitHub, then install and run:
+## 1. Install the tools (one-time setup)
 
-```bash
-git clone https://github.com/nguyen-yumot/slidev_projects.git
-cd slidev_projects
-pnpm install                       # one-time: install dependencies (links the toolkit packages)
-pnpm dev:template                  # run the starter deck (decks/template/)
-pnpm dev decks/tutorial/slides.md  # run a specific deck — pass its entry file
-```
+You need three free tools: **Git** (to download the project), **Node.js** (to run it), and **pnpm** (the package manager). Pick your operating system below and copy each line into a terminal.
 
-The dev server prints `http://localhost:3030`. Speaker view is at `/presenter`; press <kbd>o</kbd> for the slide overview.
+### macOS
 
-### Available decks
-
-Every folder under `decks/` is one presentation; its entry file is always `decks/<name>/slides.md`, with section files in `pages/` and assets in `public/` beside it. Two are tracked in the repo:
-
-| Deck | What it is | Run it with |
-| --- | --- | --- |
-| `decks/template/` | Starter walk-through of the component toolkit | `pnpm dev:template` |
-| `decks/tutorial/` | Beginner-to-advanced guide to Slidev itself | `pnpm dev decks/tutorial/slides.md` |
-
-To add another deck, copy the starter — `cp -R decks/template decks/your-deck` — set its headmatter `title`, and run `pnpm dev decks/your-deck/slides.md`. Keep `theme: default` and `addons: ['deck-core', 'deck-variant-glass']` (or `['deck-core']` for the flat look) — **without an `addons:` line the deck gets no toolkit**: no components, no styling. It runs immediately but is **gitignored by default** — [opt it in](#tracking-a-new-deck) to commit it. Split sections into the deck's `pages/` and pull each in via the `src:` key — see [Editing](#9-editing).
-
-## 2. Prerequisites
-
-Three free tools:
-
-- [Git](https://git-scm.com) — to clone the repo
-- [Node.js](https://nodejs.org) 20.12 or newer (required by Slidev v52)
-- [pnpm](https://pnpm.io) — the package manager this repo uses
-
-### Installing them
-
-Pick your platform. Each one-liner installs Git and Node.js; pnpm then comes from `npm` (which ships with Node), so it's the same everywhere.
-
-**macOS** — via [Homebrew](https://brew.sh):
+macOS installs everything through **Homebrew**, a package manager. If you've never used it, install Homebrew first:
 
 ```bash
-brew install git node          # Git + Node.js
-npm install -g pnpm            # pnpm (npm comes with Node)
+# 1. Install Homebrew (skip if you already have it — check with: brew --version)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-**Windows** — via [winget](https://learn.microsoft.com/windows/package-manager/) (built into Windows 10/11), in PowerShell:
+When it finishes, Homebrew prints a short **"Next steps"** section with one or two `echo …` / `eval …` lines — **run those lines** so your terminal can find the `brew` command (they add it to your `PATH`). Then close and reopen the terminal, and continue:
+
+```bash
+# 2. Install Git + Node.js with Homebrew
+brew install git node
+
+# 3. Install pnpm (npm comes bundled with Node)
+npm install -g pnpm
+```
+
+### Windows
+
+Windows 10/11 ship with **winget**. In **PowerShell**:
 
 ```powershell
-winget install Git.Git OpenJS.NodeJS   # Git + Node.js (reopen the terminal afterward)
+winget install Git.Git OpenJS.NodeJS   # Git + Node.js — then close and reopen PowerShell
 npm install -g pnpm                     # pnpm
 ```
 
-**Linux** (Debian/Ubuntu) — the distro's Node can be too old for Slidev v52, so install Node 20 from [NodeSource](https://github.com/nodesource/distributions):
+### Linux (Debian / Ubuntu)
+
+The version of Node in Ubuntu's default repos is often too old, so install Node 20 from [NodeSource](https://github.com/nodesource/distributions):
 
 ```bash
 sudo apt update && sudo apt install -y git curl
@@ -78,258 +66,327 @@ sudo apt install -y nodejs
 npm install -g pnpm
 ```
 
-Then confirm the versions:
+### Check it worked
+
+Run these three — each should print a version number:
 
 ```bash
 git --version     # any recent version
-node --version    # must be v20.12 or newer
-pnpm --version    # any version prints = installed OK
+node --version    # must be v20.12 or newer (Slidev v52 needs it)
+pnpm --version    # any version = installed OK
 ```
 
-## 3. Commands
+If a command says "not found," reopen your terminal and try again; if it still fails, that tool didn't install — repeat its step above.
 
-Every command takes a deck's entry file (`decks/<name>/slides.md`).
+## 2. Quick start
+
+With the tools installed, download the project and start a deck:
 
 ```bash
-pnpm dev decks/<name>/slides.md                            # live deck at localhost:3030, hot reload
-pnpm build decks/<name>/slides.md                          # static SPA in the deck's own dist/
-pnpm build decks/tutorial/slides.md --base /tutorial/      # sub-path hosting
-pnpm export decks/<name>/slides.md                         # PDF (also --format pptx | png)
+git clone https://github.com/nguyen-yumot/slidev_projects.git
+cd slidev_projects
+pnpm install          # one-time: downloads dependencies and links the toolkit
+pnpm dev:template     # open the starter deck
 ```
 
-Paths resolve relative to the deck (Slidev treats the entry file's folder as the project root), so a bare `pnpm build` writes to `decks/<name>/dist/`; pass an **absolute** `--out` to put it elsewhere — `scripts/deploy.sh` does exactly that to collect every deck under the repo-root `dist/`.
+`git clone` **creates** the `slidev_projects` folder for you — don't make it yourself. After `pnpm dev:template` starts, it prints a link like `http://localhost:3030` — open it in your browser. Edits to the deck's Markdown reload instantly. Press <kbd>o</kbd> for a slide overview; speaker view is at `/presenter`. Stop the server with <kbd>Ctrl</kbd>+<kbd>C</kbd>.
 
-Examples:
+To run a different deck, pass its entry file (`decks/<name>/slides.md`):
 
-```bash
-pnpm dev decks/tutorial/slides.md     # serve the tutorial deck
-pnpm build decks/tutorial/slides.md   # build the tutorial deck to decks/tutorial/dist/
-pnpm export decks/tutorial/slides.md  # export the tutorial deck to PDF
-```
-
-CLI export (`pnpm export`) uses `playwright-chromium`, a tracked dev dependency that `pnpm install` already brings in — just install its browser once with `pnpm exec playwright install chromium`. Without the browser, use the in-browser exporter at `localhost:3030/export`, which needs nothing extra.
-
-## 4. Publish decks online (GitHub Pages)
-
-Publish your decks as links anyone can open — no install, no account. Only the compiled output is pushed to a `gh-pages` branch; your `.md` source stays on your machine.
-
-### Source vs. site — two separate things
-
-Saving your work and updating the website are **two independent actions** — doing one never does the other:
-
-| | Source code | Live site |
+| Deck | What it is | Run it with |
 | --- | --- | --- |
-| **Where it lives** | the `master` branch | the `gh-pages` branch (auto-generated) |
-| **Update it with** | `git add` / `git commit` / `git push` | `bash scripts/deploy.sh` (= `pnpm deploy:pages`) |
-| **What it stores** | your `.md` files, README, scripts | the built HTML + PDFs from `dist/` |
-| **Edit it by hand?** | yes | no — it's overwritten on every deploy |
+| `decks/template/` | Starter that shows every toolkit component | `pnpm dev:template` |
+| `decks/tutorial/` | Beginner-to-advanced guide to Slidev | `pnpm dev decks/tutorial/slides.md` |
 
-- **To update the website**, run `bash scripts/deploy.sh`. It builds the decks and pushes the output to `gh-pages` for you — you never `git commit` to `gh-pages` yourself.
-- **To save your source on GitHub**, `git push` to `master`. This does **not** change the live site.
+Every folder under `decks/` is one presentation: its entry is always `slides.md`, with section files in `pages/` and images in `public/` beside it.
 
-You can do either, both, or neither: deploy without committing (the site changes, your source stays only on your machine), or commit without deploying (your source is saved, the live slides are unchanged). And note the whitelist ([What gets committed](#8-what-gets-committed-the-whitelist)): a gitignored deck's `.md` never reaches GitHub at all, so for those decks `bash scripts/deploy.sh` is the **only** way the slides get online (as built HTML + PDF).
+## 3. Everyday commands
 
-### Publishing, step by step
-
-Follow these in order:
-
-**1. Choose which decks to publish.** Edit the `DECKS` list at the top of [`scripts/deploy.sh`](scripts/deploy.sh) — add or remove deck folder names (each entry is a `decks/<name>/` folder). Only the listed decks are published.
-
-**2. Install dependencies** (first time only). The second command installs the browser that the deploy uses to export each deck to PDF (see [PDF downloads](#pdf-downloads-for-viewers)):
+Each command takes a deck's entry file, `decks/<name>/slides.md`:
 
 ```bash
-pnpm install                            # includes playwright-chromium (a tracked dev dependency)
-pnpm exec playwright install chromium   # one-time: the headless browser used for PDF export
+pnpm dev    decks/<name>/slides.md    # 1. edit live in the browser (hot reload)
+pnpm build  decks/<name>/slides.md    # 2. build a static website into the deck's dist/
+pnpm export decks/<name>/slides.md    # 3. export to PDF (add --format pptx or png for others)
+bash scripts/deploy.sh                # 4. publish ALL listed decks online — see section 5
 ```
 
-**3. Preview locally** (optional):
+Quick examples:
 
 ```bash
-pnpm preview:pages        # same as: bash scripts/deploy.sh --no-publish
-npx serve .preview        # then open http://localhost:3000/<repo>/
+pnpm dev    decks/tutorial/slides.md    # serve the tutorial deck
+pnpm export decks/tutorial/slides.md    # save the tutorial deck as a PDF
 ```
 
-**4. Publish** — builds the listed decks and pushes them to the `gh-pages` branch:
+<details>
+<summary>▸ Where output lands, and PDF export details</summary>
+
+Slidev treats each deck's own folder as its project root, so a bare `pnpm build` writes to `decks/<name>/dist/`. To put the output elsewhere, pass an **absolute** `--out` path — `scripts/deploy.sh` does this to collect every deck under one repo-root `dist/`.
+
+`pnpm export` (PDF) uses `playwright-chromium`, a dependency that `pnpm install` already downloaded — you just need its browser once: `pnpm exec playwright install chromium`. No browser installed? Use the in-browser exporter instead: run `pnpm dev …`, open `http://localhost:3030/export`, and print — it needs nothing extra.
+
+Sub-path hosting (e.g. a deck living at `example.com/tutorial/`) needs a matching base path: `pnpm build decks/tutorial/slides.md --base /tutorial/`.
+</details>
+
+## 4. Make your own deck
+
+Copy the starter, give it a title, and run it:
 
 ```bash
-pnpm deploy:pages         # or, equivalently: bash scripts/deploy.sh
+cp -R decks/template decks/my-deck              # copy the starter
+# → edit decks/my-deck/slides.md: set the `title:` and write your slides
+pnpm dev decks/my-deck/slides.md                # run it
 ```
 
-**5. Turn on GitHub Pages** (first time only). On GitHub, open **Settings → Pages → Build and deployment → Source**, choose **"Deploy from a branch"**, then branch **`gh-pages`** and folder **`/ (root)`**, and Save.
+Keep the two headmatter lines the starter already has — `theme: default` and an `addons:` line:
 
-**6. Open your links.** After about a minute the decks are live (owner and repo are taken from your git remote; `pnpm deploy:pages` also prints the URLs):
-
-```
-https://<owner>.github.io/<repo>/             # landing page, links every deck
-https://<owner>.github.io/<repo>/tutorial/    # an individual deck
-https://<owner>.github.io/<repo>/statistics/
+```yaml
+addons: ['deck-core', 'deck-variant-glass']   # the glass look — or ['deck-core'] for flat
 ```
 
-**To update later**, repeat steps 1 and 4 — step 5 is one-time.
+⚠️ **Without an `addons:` line the deck gets no toolkit** — no components, no styling. See [section 7](#7-looks-change-the-design) for the other looks.
 
-> **Deployed but don't see the change?** It's almost always your browser cache, not a failed deploy. GitHub Pages serves each page with `Cache-Control: max-age=600`, so for up to ~10 minutes your browser keeps showing the old version (a brand-new deck can be missing from the landing page, or an edited one can look unchanged). The site itself updates within a minute or two of the deploy. To see it right away: **hard-refresh** (<kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>), open the link in a private window, or append a throwaway query like `?v=2`. To check what GitHub is *actually* serving — independent of your browser — confirm the deck folder reached the branch with `git ls-remote --heads origin gh-pages` (the commit hash changes on a successful push) or fetch the headers with `curl -sI https://<owner>.github.io/<repo>/`.
+Your new deck runs immediately, but it is **not saved to Git by default** (the repo only tracks the toolkit and the two reference decks — see [section 9](#9-what-gets-committed-the-whitelist)). That's intentional: draft as many private decks as you like. To commit one, [track it](#track-a-new-deck). Split a long deck into `pages/` files and pull each in with `src:` — see [section 10](#10-editing-and-other-topics).
 
-> **Public vs private.** Your `.md` source is never pushed, but a published deck's rendered slides and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
+## 5. Publish online (GitHub Pages)
 
-### If publishing fails
+Turn your decks into links anyone can open — no install, no account needed. **One command does it all:**
 
-`pnpm deploy:pages` (i.e. `bash scripts/deploy.sh`) reuses a cached clone of the `gh-pages` branch under `node_modules/.cache/gh-pages/`. If a previous run was interrupted, the **publish** step can fail — the **build still succeeds**, so `dist/` is complete — with a Git error like:
+```bash
+bash scripts/deploy.sh        # (same as: pnpm deploy:pages)
+```
+
+It builds every listed deck, exports each to PDF, makes a landing page, and pushes the result to a special `gh-pages` branch. **You never edit or commit that branch yourself** — the script owns it.
+
+### First-time setup
+
+**a. Choose which decks to publish.** Open [`scripts/deploy.sh`](scripts/deploy.sh) and edit the `DECKS=(…)` list near the top — one deck folder name per line. Only listed decks are published.
+
+**b. Install the PDF browser** (once). The deploy renders each deck to a downloadable PDF using a headless browser:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+**c. Preview locally first** (optional, recommended):
+
+```bash
+pnpm preview:pages        # builds everything without publishing
+npx serve .preview        # then open the printed http://localhost:3000/… link
+```
+
+**d. Publish:**
+
+```bash
+bash scripts/deploy.sh
+```
+
+**e. Turn on GitHub Pages** (once). On GitHub: **Settings → Pages → Build and deployment → Source** → choose **"Deploy from a branch"** → branch **`gh-pages`**, folder **`/ (root)`** → **Save**.
+
+**f. Open your links.** After ~1 minute the decks are live (the command also prints these URLs):
+
+```
+https://<owner>.github.io/<repo>/             ← landing page, links every deck
+https://<owner>.github.io/<repo>/tutorial/    ← one deck
+```
+
+**To update later:** just run `bash scripts/deploy.sh` again. Steps a, b, and e are one-time only.
+
+<details>
+<summary>▸ Saving source vs. updating the site (important!)</summary>
+
+Saving your work and updating the website are **two separate actions** — doing one never does the other:
+
+| | Your source code | The live website |
+| --- | --- | --- |
+| **Lives on** | the `master` branch | the `gh-pages` branch (auto-generated) |
+| **Update with** | `git add` / `commit` / `push` | `bash scripts/deploy.sh` |
+| **Holds** | your `.md` files, README, scripts | the built HTML + PDFs |
+| **Edit by hand?** | yes | no — overwritten each deploy |
+
+So `git push` saves your source but does **not** change the live slides, and `bash scripts/deploy.sh` updates the live slides but does **not** commit your source. Do either, both, or neither. Note: a [gitignored deck](#9-what-gets-committed-the-whitelist)'s `.md` never reaches GitHub, so for those decks `bash scripts/deploy.sh` is the *only* way the slides get online (as built HTML + PDF).
+
+**Privacy:** your `.md` source is never pushed, but a published deck's rendered slides and presenter notes are visible to anyone with the link — don't put secrets in decks or notes.
+</details>
+
+<details>
+<summary>▸ PDF downloads for viewers</summary>
+
+Every published deck is exported to PDF at deploy time, so viewers can save a copy. Each deck offers it two ways: a **PDF** link beside the deck on the landing page, and a **Download PDF** button in the deck's own toolbar (bottom-left, appears on hover).
+
+This needs the `playwright-chromium` browser from step **b**; if it's missing, the deploy stops with instructions. PDF export adds time to each deploy (it renders every slide). The file is named after the deck's front-matter `title` (falling back to its first `# heading`, then the folder name) — the same name everywhere, so all paths agree. The `DECKS` list only *chooses* which decks to publish; it never sets titles.
+</details>
+
+<details>
+<summary>▸ Published but don't see your change?</summary>
+
+It's almost always your **browser cache**, not a failed deploy. GitHub Pages tells browsers to cache each page for ~10 minutes, so you may keep seeing the old version briefly. The site itself updates within a minute or two.
+
+To see it right away: **hard-refresh** (<kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>), open the link in a private window, or add a throwaway `?v=2` to the URL. To check what GitHub is *actually* serving (independent of your browser): `git ls-remote --heads origin gh-pages` — the commit hash changes on a successful push.
+</details>
+
+<details>
+<summary>▸ If publishing fails ("unable to create temporary file")</summary>
+
+The deploy reuses a cached clone of `gh-pages` under `node_modules/.cache/gh-pages/`. If a previous run was interrupted, the **publish** step can fail (the **build still succeeds**, so `dist/` is complete) with:
 
 ```
 unable to create temporary file: Invalid argument
 fatal: adding files failed
 ```
 
-Clear the stale cache, then re-publish the already-built `dist/` (no rebuild needed):
+Clear the stale cache, then re-publish the already-built `dist/` — no rebuild needed:
 
 ```bash
-pnpm exec gh-pages-clean                                          # wipe the cached clone (do NOT rm -rf it)
-pnpm exec gh-pages -d dist --dotfiles --no-history -b gh-pages    # push dist/ to the gh-pages branch
+pnpm exec gh-pages-clean                                          # wipe the cached clone (don't rm -rf it)
+pnpm exec gh-pages -d dist --dotfiles --no-history -b gh-pages    # push dist/ to gh-pages
 ```
 
-`gh-pages-clean` ships with the `gh-pages` dependency. Confirm the push landed with `git ls-remote --heads origin gh-pages` — the commit hash should change.
+Confirm it landed with `git ls-remote --heads origin gh-pages` — the commit hash should change.
+</details>
 
-### PDF downloads for viewers
+<details>
+<summary>▸ How the deploy works (background)</summary>
 
-Every published deck is exported to PDF at deploy time, so viewers can save a copy with no install and no browser fiddling. Each deck offers it two ways:
+- **`scripts/deploy.sh`** lets one command do everything: build every deck in `DECKS`, export each to PDF, generate the landing page, and push only the compiled output to `gh-pages`. Without it you'd build and deploy each deck by hand.
+- **Image paths are fixed automatically.** On GitHub Pages each deck lives under a `/<repo>/<name>/` sub-path, but decks reference images from the web root (e.g. `/chart.svg` for `decks/<name>/public/chart.svg`). The toolkit (`core/global-bottom.vue`) rewrites those paths at runtime, so images that work in `pnpm dev` also work once published — no edits needed.
+- The viewer-side `?print` route is deliberately **not** used — it's unreliable under GitHub Pages' sub-path routing, so the deploy pre-renders real PDF files instead.
+</details>
 
-- a **PDF** link beside the deck on the landing page, and
-- a **Download PDF** button inside the deck's own toolbar (bottom-left on hover).
+---
 
-This needs the `playwright-chromium` browser from step 2; if it's missing, `pnpm deploy:pages` stops with instructions. PDF export adds time to each deploy (it renders every slide). The file is named after the deck's front-matter `title` (falling back to its first `# heading`, then the deck's folder name) — the same name you get from `pnpm dev` → `/export` and the in-deck Download button, so every path agrees. The `DECKS` list only *chooses* which decks to publish; it never sets titles. (Viewer-side `?print` is **not** used — it's unreliable under GitHub Pages' sub-path routing.)
-
-**How this works (background):**
-
-- **`scripts/deploy.sh`** lets a single command do everything publishing needs: build every deck in the `DECKS` list, export each to PDF, generate the landing page, and push only the compiled output to `gh-pages`. Without it you would have to build and deploy each deck by hand.
-- **Image paths are fixed automatically.** On GitHub Pages each deck lives under a `/<repo>/<name>/` sub-path, but decks reference their public images from the web root (e.g. `/chart.svg` for `decks/<name>/public/chart.svg`). The toolkit (`core/global-bottom.vue`) rewrites those paths to include the sub-path at runtime, so images that work in `pnpm dev` also work once published — no edits needed.
-
-## 5. Toolkit reference
+## 6. Components and layouts
 
 Components are auto-imported — use them directly in any slide.
 
 | Component | What it does |
 | --- | --- |
-| `<Callout type="tip\|warning\|note\|try\|blank" title="…">` | Coloured advice box with a Carbon icon. `blank` drops the icon and label for a plain neutral highlight. |
+| `<Callout type="tip\|warning\|note\|try\|blank" title="…">` | Coloured advice box with a Carbon icon. `blank` drops the icon and label for a plain highlight. |
 | `<FeatureCard title="…" icon="i-carbon-grid" row>` | Titled card for overviews; `row` puts icon + title inline. |
 | `<KeyCap>o</KeyCap>` / `<KeyCaps>Space,→</KeyCaps>` | Render keys as keyboard caps. |
 | `<Chip>cover</Chip>` / `<Chips>a, b, c</Chips>` | Monospace pills. |
 | `<Eyebrow>Part 3</Eyebrow>` | Uppercase tag above a title. |
 | `<ColHead>Heading</ColHead>` | Column heading inside `multicolumns`. |
+| `<Tex>\sigma^2</Tex>` | Inline math (KaTeX) that works even inside the tags above. |
 
-**Code blocks inside a Callout/FeatureCard** are supported: write them with the `::Callout{…}` block form, or the `<Callout>…</Callout>` form with a **blank line** around the code (without the blank lines the fence is silently dropped). Long lines scroll within the box instead of clipping.
-
-Layouts (set per slide via `layout:`):
+**Layouts** (set per slide via the `layout:` headmatter key):
 
 - **`section`** — full-bleed gradient divider for the start of a part.
-- **`multicolumns`** — up to four named columns (`#col1`–`#col4`); the grid width adapts to how many slots you fill.
+- **`multicolumns`** — up to four named columns (`#col1`–`#col4`); the grid width adapts to how many you fill.
 
-The look is driven by `--deck-*` CSS variables defined in a **palette** file — `core/styles/palette-flat.css` (the flat default) or a variant's palette under `variants/*/styles/` (`palette-glass.css`, `palette-minimal.css`, `palette-print.css`). The shared structural rules live in `core/styles/base.css`. To re-skin, switch the palette via `addons:` (below) rather than editing components.
+> **Code blocks inside a Callout/FeatureCard** work, but need a **blank line** above and below the fence (or use the `::Callout{…}` block form) — without the blank lines the code fence is silently dropped. Long lines scroll within the box instead of clipping.
 
-## 6. Looks
+<details>
+<summary>▸ Icons, and how the styling is organised</summary>
 
-The toolkit ships one shared **core** and one or more **look variants**, wired as Slidev addons via pnpm **workspace packages** (`core/` and `variants/*` are linked into the root `node_modules`, so any deck at any folder depth loads them by name). A deck picks its look in frontmatter — change the one line to reskin the whole deck:
+Icons use the [Carbon](https://icones.js.org/collection/carbon) set — write them as `i-carbon-<name>` (e.g. `i-carbon-idea`). ⚠️ A misspelled icon name renders as a **silent empty box** with no error, so copy names from the icon browser.
+
+The look is driven by `--deck-*` CSS variables in a **palette** file: `core/styles/palette-flat.css` (the default) or a variant under `variants/*/styles/`. Shared structural rules live in `core/styles/base.css`. To re-skin, switch the palette via `addons:` (next section) rather than editing components.
+</details>
+
+## 7. Looks (change the design)
+
+Change one line in a deck's headmatter to reskin the whole thing:
 
 ```yaml
 theme: default
-addons: ['deck-core']                         # flat (the default look — teal, opaque, system fonts)
-addons: ['deck-core', 'deck-variant-glass']   # glass (translucent, blur, web fonts, ocean section)
-addons: ['deck-core', 'deck-variant-minimal'] # minimal (flat's teal, every heavy effect stripped)
-addons: ['deck-core', 'deck-variant-print']   # print (monochrome paper — black on white, hairlines)
+addons: ['deck-core']                         # flat    — teal, opaque, system fonts (default)
+addons: ['deck-core', 'deck-variant-glass']   # glass   — translucent, blur, web fonts
+addons: ['deck-core', 'deck-variant-minimal'] # minimal — flat's teal, every heavy effect stripped
+addons: ['deck-core', 'deck-variant-print']   # print   — monochrome paper, black on white
 ```
 
-| Look | Style | When to use |
+| Look | Style | Best for |
 | --- | --- | --- |
-| `flat` | Teal accents, opaque surfaces, subtle shadows, grain-textured section divider | Default for on-screen presenting |
-| `glass` | Glassmorphism — translucency, backdrop blur, web fonts, ocean section | Showpiece decks presented from the browser |
-| `minimal` | Flat's teal palette with **zero** shadows/blur/gradients/transparency | Large decks whose exported PDFs must open instantly |
-| `print` | Monochrome paper — ink on white, grayscale callouts, hairline borders | Handout-style decks and print-first PDFs |
+| `flat` | Teal accents, opaque surfaces, subtle shadows | Default on-screen presenting |
+| `glass` | Glassmorphism — translucency, blur, web fonts | Showpiece decks from the browser |
+| `minimal` | Flat's teal with **zero** shadows/blur/gradients | Big decks whose PDFs must open instantly |
+| `print` | Monochrome paper — ink on white, hairlines | Handouts and print-first PDFs |
 
-**All four looks export fast PDFs.** Two things make a big exported deck slow to view — pages opening blank, filling in gradually, re-rendering as you page back: **effects** (backdrop blur, blend modes, alpha gradients and translucent fills become transparency groups, soft masks, and per-pixel PostScript shadings) and **fonts** (system fonts like macOS San Francisco, and Google-served variable fonts — multi-weight Inter, Roboto, JetBrains Mono… — can't be subset-embedded by Chromium, so every glyph ships as a slow Type 3 outline). The looks handle this differently:
+- **List `'deck-core'` first**, then a variant after it (the variant overrides core's default look). These are package names — don't use `'@/core'` paths.
+- **Core is shared:** fixing a component in `core/` updates every look at once.
 
-- `minimal` and `print` are built lean: only opaque flat colours and static web fonts (Lato + IBM Plex Mono) everywhere — screen and PDF are the same.
-- `flat` and `glass` keep their full effects on screen and swap in cheap equivalents **only under print media** (`@media print` blocks in their palettes, which is what PDF export renders with): precomposited opaque fills, gradient dividers without the grain/glow texture, no backdrop blur, and static fonts (flat's PDFs use Inter in place of San Francisco; glass requests its own fonts one weight per `@import`, which makes Google serve static files). The exported pages look almost identical, minus the subtle texture effects.
+<details>
+<summary>▸ Why all four looks export fast PDFs</summary>
 
-- **List `'deck-core'` first**, then a variant after it — the variant overrides core's default palette tokens. These are package names, not paths; don't use `'@/core'` (the `@/` prefix resolves to the deck's own folder, not the repo root, and fails from inside `decks/`).
-- **Core is shared and never duplicated** — fixing a component or adding a feature in `core/` applies to every look at once.
-- **Add a new look** = add `variants/<name>/`: copy a palette file (e.g. `palette-flat.css`), change the values, add a 2-line `styles/index.ts` and a minimal `package.json` named `deck-variant-<name>`, add `"deck-variant-<name>": "workspace:*"` to the root `package.json` and `pnpm install`, then `addons: ['deck-core', 'deck-variant-<name>']`.
+Two things make a big exported deck slow to view (pages opening blank, filling in gradually): **effects** (backdrop blur, blend modes, alpha gradients — these become transparency groups, soft masks, and per-pixel PostScript shadings in the PDF) and **fonts** (system fonts like San Francisco and Google variable fonts can't be subset-embedded by Chromium, so every glyph ships as a slow Type 3 outline).
 
-## 7. Project structure
+- `minimal` and `print` are built lean: opaque flat colours and static web fonts everywhere — screen and PDF are identical.
+- `flat` and `glass` keep full effects on screen but swap in cheap equivalents **only under print media** (`@media print`, which is what PDF export uses): precomposited fills, gradient dividers without grain/glow, no blur, and static fonts. Exported pages look nearly identical, minus subtle texture.
+</details>
+
+<details>
+<summary>▸ Add a new look</summary>
+
+Add `variants/<name>/`: copy a palette file (e.g. `palette-flat.css`), change the values, add a 2-line `styles/index.ts` and a minimal `package.json` named `deck-variant-<name>`, add `"deck-variant-<name>": "workspace:*"` to the root `package.json`, run `pnpm install`, then use `addons: ['deck-core', 'deck-variant-<name>']`.
+</details>
+
+## 8. Project structure
 
 ```
-.gitignore              Whitelist — tracks only the items below (see "What gets committed")
-CLAUDE.md               Scope rules for AI-assisted editing (template vs decks)
 package.json            Workspace + scripts (dev / build / export / preview:pages / deploy:pages)
-pnpm-lock.yaml
 pnpm-workspace.yaml     Declares core/ and variants/* as workspace packages
-scripts/deploy.sh       Build + publish the listed decks to GitHub Pages (pnpm deploy:pages)
-scripts/export-pdf.mjs  Headless PDF exporter the deploy uses (drives the /export page)
+scripts/deploy.sh       Build + publish the listed decks to GitHub Pages
+scripts/export-pdf.mjs  Headless PDF exporter the deploy uses
 
-core/                   Shared toolkit addon, package `deck-core` (loaded by every deck via addons:)
-  components/           Custom Vue components (Callout, FeatureCard, Chips, KeyCap, Tex…)
-  layouts/              Custom layouts — section (divider), multicolumns (dense reference)
+core/                   Shared toolkit, package `deck-core` (loaded by every deck via addons:)
+  components/           Vue components (Callout, FeatureCard, Chips, KeyCap, Tex…)
+  layouts/              section (divider) + multicolumns (dense reference)
   setup/                preparser.ts (PDF filename = deck title) + deck-name.mjs (deploy helper)
-  styles/               base.css (structural) + palette-flat.css (default look) + index.ts
-  global-bottom.vue     Runtime base-path image fix (for sub-path hosting; see Publish)
-variants/               Look variants — palette-only addons, packages `deck-variant-*`
-  glass/                Glassmorphism palette (styles/palette-glass.css)
-  minimal/              Fast-PDF flat palette — zero effects (styles/palette-minimal.css)
-  print/                Monochrome paper palette (styles/palette-print.css)
+  styles/               base.css (structure) + palette-flat.css (default look)
+  global-bottom.vue     Runtime image-path fix for sub-path hosting
+variants/               Look variants — palette-only, packages `deck-variant-*`
+  glass/  minimal/  print/
 
 decks/                  One folder per presentation — slides.md (entry) + pages/ + public/
-  template/             Starter deck — exercises every toolkit piece (pnpm dev:template)
-    slides.md
-    pages/example.md
-  tutorial/             Beginner-to-advanced Slidev guide — a worked example of the toolkit
-    slides.md
-    pages/              Its section files (01-beginner … 04-toolkit)
-    public/             Its two demo assets (layout-demo.svg, slidev-logo.png)
+  template/             Starter deck (pnpm dev:template)
+  tutorial/             Beginner-to-advanced Slidev guide
 ```
 
-Present on disk but **gitignored** (not committed): every other folder under `decks/` — your own presentations, each with its `slides.md`, `pages/`, `public/`, and optional `data/` — plus `node_modules/`, `dist/`, `.preview/` (the local preview staged by `pnpm preview:pages`), and `.claude/` (the authoring skill).
+Present on disk but **gitignored** (not committed): every other deck under `decks/` — your own presentations — plus `node_modules/`, `dist/`, `.preview/`, and `.claude/`.
 
-## 8. What gets committed (the whitelist)
+## 9. What gets committed (the whitelist)
 
-`.gitignore` ignores **everything** by default, then re-includes only the toolkit, the two reference decks, and the config. The mechanism is a whitelist:
+`.gitignore` ignores **everything** by default, then re-includes only the toolkit, the two reference decks, and the config. So anything you add — a new deck, a scratch file — is ignored automatically unless you opt it in. This keeps the repo a clean toolkit even while you draft decks alongside it.
+
+### Track a new deck
+
+A new deck runs the moment you create it, but Git won't see it until you whitelist it. To commit `decks/AAA/`, **append** one line to the end of `.gitignore` (it must come *after* the `/decks/*` rule):
+
+```gitignore
+!/decks/AAA/
+```
+
+One folder = one line; everything inside it (slides.md, pages/, public/, data/) comes along.
+
+<details>
+<summary>▸ How the whitelist is written</summary>
 
 ```gitignore
 /*                       # ignore every top-level entry...
-!/core/                  # ...then re-include the toolkit (shared core + look variants)...
+!/core/                  # ...then re-include the toolkit...
 !/variants/
-!/.gitignore             # ...the config...
-!/package.json
+!/package.json           # ...the config...
 !/pnpm-lock.yaml
 !/pnpm-workspace.yaml
 !/README.md
-!/CLAUDE.md
 !/decks/                 # ...and selected decks (one folder each):
 /decks/*                 #    ignore every deck...
 !/decks/template/        #    ...except the starter...
 !/decks/tutorial/        #    ...and the tutorial.
-/decks/tutorial/public/* #    (inside it, keep just the two demo assets)
-!/decks/tutorial/public/layout-demo.svg
-!/decks/tutorial/public/slidev-logo.png
-!/scripts/               # ...and the deploy script + its helpers (other scripts stay ignored):
+!/scripts/               # ...and the deploy script + its helper:
 /scripts/*
 !/scripts/deploy.sh
 !/scripts/export-pdf.mjs
 node_modules/            # junk to keep out even inside tracked folders
 ```
 
-Anything you add whose name isn't on that list — a new deck folder, a scratch file — is ignored automatically, now and in the future. This keeps the repo a clean toolkit even while you draft decks alongside it.
+A re-include only works if its parent directory is re-included first (git won't descend otherwise) — which is why `!/decks/AAA/` works: `decks/` itself is already re-included above.
+</details>
 
-### Tracking a new deck
+## 10. Editing and other topics
 
-A new deck runs the moment you create it, but `git status` won't see it until you whitelist it. To commit `decks/AAA/` (entry, sections, and assets in one go), **append** one line to the end of `.gitignore` (order matters — a re-include must come *after* the `/decks/*` rule that ignores it):
-
-```gitignore
-!/decks/AAA/
-```
-
-That re-include works because `decks/` itself is already re-included (`!/decks/` + `/decks/*` in the whitelist above) — git won't descend into a directory unless its parent is re-included first. One folder = one line; everything inside it (slides.md, pages/, public/, data/) comes along.
-
-## 9. Editing
-
-Decks are plain Markdown — edit a deck's `slides.md` or its `pages/*.md` and the dev server hot-reloads. Split a large deck into files under its `pages/` and pull each section in with the `src:` frontmatter key:
+Decks are plain Markdown — edit a deck's `slides.md` or its `pages/*.md` and the dev server hot-reloads. Split a large deck into `pages/` files and pull each section in with `src:`:
 
 ```yaml
 ---
@@ -337,9 +394,10 @@ src: ./pages/your-section.md
 ---
 ```
 
-Drop new layouts in `core/layouts/` and new components in `core/components/` — both are auto-imported from the `core` addon.
+Drop new layouts in `core/layouts/` and new components in `core/components/` — both are auto-imported.
 
-### Japanese (CJK) fonts
+<details>
+<summary>▸ Japanese (CJK) fonts</summary>
 
 For a Japanese deck, set platform CJK fonts in the deck's headmatter so text renders crisply:
 
@@ -349,90 +407,71 @@ fonts:
   serif: "Hiragino Mincho ProN, Yu Mincho, serif"
   local: "Hiragino Kaku Gothic ProN, Yu Gothic, Hiragino Mincho ProN, Yu Mincho"
 ```
+</details>
 
-## 10. Convert an existing Markdown file into a deck
+<details>
+<summary>▸ Convert an existing Markdown file into a deck (with Claude Code)</summary>
 
-Have a plain Markdown file you want turned into a deck in this repo's format? In Claude Code, the `slidev-deck-authoring` skill (in `.claude/skills/`) knows the conventions. Paste a prompt like this, swapping in your filename:
+Have a plain Markdown file you want turned into a deck? In Claude Code, the `slidev-deck-authoring` skill (in `.claude/skills/`) knows the conventions. Paste a prompt like this, swapping in your filename:
 
 ```text
 Convert AAA.md into a Slidev deck using this repo's toolkit and conventions:
-- create the folder decks/AAA/ with its entry at decks/AAA/slides.md (headmatter with
-  `theme: default` + `addons: ['deck-core', 'deck-variant-glass']`, then cover + one
+- create decks/AAA/ with its entry at decks/AAA/slides.md (headmatter with
+  theme: default + addons: ['deck-core', 'deck-variant-glass'], cover + one
   src: block per section)
 - split the sections into decks/AAA/pages/01-….md, 02-….md, …
-- copy any images/assets under decks/AAA/public/, mirroring their original subfolder
-  structure (so files in different source folders never collide), and reference each
-  from the web root as /… — never a ./public or relative path
+- copy any images under decks/AAA/public/, mirroring their source subfolders,
+  and reference each from the web root as /… — never a ./public or relative path
 - open each part with a `layout: section` divider and use the toolkit components
-  (Callout, FeatureCard, KeyCaps, multicolumns) instead of flat Markdown where it helps
+  (Callout, FeatureCard, KeyCaps, multicolumns) where they help
 - leave the original AAA.md untouched
 ```
 
-The result lands alongside the existing decks:
-
-```
-AAA.md                        original source (left as-is)
-decks/AAA/slides.md           new deck entry — run it with `pnpm dev decks/AAA/slides.md`
-decks/AAA/pages/01-….md       section files pulled in via src:
-decks/AAA/public/…            assets, mirroring source folders, referenced as /… in slides
-```
-
-Converted decks are **gitignored by default** — whitelist them as shown in [Tracking a new deck](#tracking-a-new-deck) if you want them committed. The skill itself lives under `.claude/`, which is also gitignored, so it's available locally but doesn't ship with a clone.
+Converted decks are gitignored by default — [track them](#track-a-new-deck) to commit.
+</details>
 
 ## 11. Reusing this toolkit elsewhere
 
-The shared components, the `section` / `multicolumns` layouts, and the design tokens are written to be portable. Three ways to reuse them, in order of effort.
+The components, layouts, and design tokens are portable. Three ways to reuse them, in order of effort.
 
-### Option 1 — Copy the folders (fastest)
+<details>
+<summary>▸ Option 1 — Copy the folders (fastest)</summary>
 
-Copy the `core/` folder (and any `variants/` you want) into a fresh Slidev project, then point your deck at them with `addons:`.
+Copy `core/` (and any `variants/` you want) into a fresh Slidev project, then point your deck at them:
 
 ```bash
-# 1. scaffold a new deck
-pnpm create slidev my-talk
-cd my-talk
-
-# 2. copy the toolkit from this repo
+pnpm create slidev my-talk && cd my-talk
 cp -R /path/to/this-repo/core     ./core
 cp -R /path/to/this-repo/variants ./variants
-
-# 3. the <Tex> component renders with KaTeX
-pnpm add katex
-
-# 4. install and run
-pnpm install
-pnpm dev
+pnpm add katex          # the <Tex> component renders with KaTeX
+pnpm install && pnpm dev
 ```
 
-In the new deck's headmatter, load the toolkit and set the keys it expects:
+In the new deck's headmatter:
 
 ```yaml
 theme: default
 addons: ['@/core', '@/variants/glass']  # or ['@/core'] for the flat look
 mdc: true
-transition: slide-left
-lineNumbers: true
 ```
 
-(The `@/` path form works *there* because the scaffolded `slides.md` sits at the project root, right next to the copied `core/` — `@/` resolves relative to the entry file's folder. In this repo the decks live under `decks/`, which is why they use the package names `deck-core` / `deck-variant-*` instead.)
+The `@/` path form works *there* because the scaffolded `slides.md` sits at the project root next to `core/`. In *this* repo the decks live under `decks/`, which is why they use the package names `deck-core` / `deck-variant-*` instead.
+</details>
 
-### Option 2 — Use this repo as a template
+<details>
+<summary>▸ Option 2 — Use this repo as a template</summary>
 
 Best when you want every new deck to start identical.
 
-1. On GitHub, open this repo → **Settings → General → Template repository** (check the box).
-2. Create a deck from the template and clone it:
+1. On GitHub: this repo → **Settings → General → Template repository** (check the box).
+2. `gh repo create my-talk --template <you>/<this-repo> --public --clone && cd my-talk`
+3. Copy `decks/template/` to a new folder, rewrite its `slides.md`, then `pnpm install && pnpm dev decks/<name>/slides.md`.
+</details>
 
-   ```bash
-   gh repo create my-talk --template <you>/<this-repo> --public --clone
-   cd my-talk
-   ```
+<details>
+<summary>▸ Option 3 — Publish as a Slidev addon</summary>
 
-3. Copy `decks/template/` to a new folder, rewrite its `slides.md` (and add files under its `pages/`), then `pnpm install && pnpm dev decks/<name>/slides.md`.
-
-### Option 3 — Publish as a Slidev addon
-
-This repo already uses the addon model **locally** — `core/` and each `variants/*` are Slidev addons, linked as pnpm workspace packages and referenced by name (`deck-core`, `deck-variant-glass`, …). To share them across repos, publish each as an npm package (`slidev-addon-…`) with a `slidev.defaults` block — see [sli.dev/guide/write-addon](https://sli.dev/guide/write-addon) — then opt in by name from any deck's headmatter:
+To share across repos, publish each of `core/` and `variants/*` as an npm package (`slidev-addon-…`) with a `slidev.defaults` block — see [sli.dev/guide/write-addon](https://sli.dev/guide/write-addon) — then opt in by name from any deck:
 
 ```yaml
 addons:
@@ -440,6 +479,9 @@ addons:
   - your-glass-addon
 ```
 
-**Where to start:** Option 1 for your next deck. If you reach for the same pieces a third time, promote them to Option 3 — by then you'll know what genuinely belongs in the addon.
+**Where to start:** Option 1 for your next deck. If you reach for the same pieces a third time, promote them to Option 3.
+</details>
+
+---
 
 Built with [Slidev](https://sli.dev) v52.

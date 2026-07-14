@@ -13,6 +13,18 @@ cd "$(dirname "$0")/.."          # always run from the repo root
 DECKS=(
   "tutorial"
   "statistics"
+  "git-github"
+)
+
+# ── Companion documents: extra Markdown files published alongside a deck — offered on the
+#    landing page as "read online" (a styled in-site reader that renders Markdown + Mermaid)
+#    plus a raw ".md" download. One entry per line, four |-separated fields:
+#      <deck-folder>|<file.md>|<Card title>|<one-line description>
+#    The source must be decks/<deck-folder>/<file.md>, and <deck-folder> must be a deck in
+#    DECKS above (the doc is served from that deck's published folder). Leave empty for none.
+DOCS=(
+  "git-github|story.md|The Git Story|Mai's midnight analysis — the deck's eight stops told as one continuous tale."
+  "git-github|glossary.md|Glossary|Every key Git & GitHub term, explained for a first-timer."
 )
 
 # Split a DECKS entry into globals DECK_FILE (the deck's entry file) and DECK_NAME (its
@@ -46,8 +58,8 @@ if [ "${#DECKS[@]}" -eq 0 ]; then
 fi
 
 # Each deck is rendered to a downloadable PDF (the in-deck Download button + the landing-page
-# PDF link) — both `slidev build --download` and scripts/export-pdf.mjs drive a headless
-# Chromium, which needs Slidev's optional playwright-chromium.
+# PDF link) by scripts/export-pdf.mjs (step 2), which drives a headless Chromium — so this
+# needs Slidev's optional playwright-chromium.
 if ! node -e "require.resolve('playwright-chromium/package.json')" >/dev/null 2>&1; then
   echo "deploy.sh: playwright-chromium is required to export the deck PDFs." >&2
   echo "  install it once:  pnpm add -D playwright-chromium && pnpm exec playwright install chromium" >&2
@@ -73,14 +85,18 @@ for entry in "${DECKS[@]}"; do
   DECK_TITLE=$(html_escape "$TITLE")
   PDF_DOWNLOAD=$(html_escape "$PDF_FILE")
 
-  # Step 1 — build the static site + the in-deck "Download PDF" button (--download). The preparser
-  #   sets exportFilename, so the build writes the PDF as dist/<name>/<title>.pdf and the button
-  #   points there; its content is unreliable (truncated/blank — see step 2), so step 2 overwrites
-  #   that same file.
+  # Step 1 — build the static site + the in-deck "Download PDF" button. We do NOT pass
+  #   `--download`: that flag ALSO renders a full PDF via headless Chromium, which is both
+  #   unreliable (truncated/blank) AND immediately thrown away — step 2 overwrites it. Instead
+  #   we export DECK_DOWNLOAD_NAME so deck-core's preparser adds a STRING `download: <title>.pdf`
+  #   headmatter value: Slidev shows the button and links it to that file, but runs its
+  #   build-time export only for download true/"true"/"auto" — a string is skipped, so no
+  #   wasted export. Step 2 writes the real <title>.pdf the button points at. (The env var
+  #   scopes this to the build; `pnpm dev` never sets it, so dev shows no dead button.)
   # --out must be ABSOLUTE: Slidev resolves a relative outDir against the deck's own
   # folder (decks/<name>/), not the cwd, which would scatter dist/ into each deck.
-  pnpm exec slidev build "$DECK_FILE" --base "/$REPO/$DECK_NAME/" --out "$PWD/dist/$DECK_NAME" \
-    --download
+  DECK_DOWNLOAD_NAME="$PDF_FILE" pnpm exec slidev build "$DECK_FILE" \
+    --base "/$REPO/$DECK_NAME/" --out "$PWD/dist/$DECK_NAME"
 
   # Step 2 — overwrite that PDF with one from Slidev's BROWSER exporter (the /export page you get
   #   from `pnpm dev` → open /export → print), driven headlessly. Every CLI exporter path is broken
@@ -108,6 +124,185 @@ for entry in "${DECKS[@]}"; do
       </div>"
 done
 
+# ── Publish companion documents (the DOCS list). Copy each into its deck's published folder
+#    (so the ".md" downloads same-origin) and build a landing-page card that links to the
+#    in-site reader (view) and the raw file (download). The reader page (read.html) is
+#    written once into each deck folder that has at least one doc.
+doc_cards=""
+reader_decks=""
+for entry in "${DOCS[@]:-}"; do
+  [ -n "$entry" ] || continue
+  IFS='|' read -r DOC_DECK DOC_FILE DOC_TITLE DOC_DESC <<< "$entry"
+  DOC_SRC="decks/$DOC_DECK/$DOC_FILE"
+  if [ ! -f "$DOC_SRC" ]; then
+    echo "deploy.sh: doc source missing, skipping: $DOC_SRC" >&2; continue
+  fi
+  if [ ! -d "dist/$DOC_DECK" ]; then
+    echo "deploy.sh: doc's deck '$DOC_DECK' isn't published (add it to DECKS) — skipping $DOC_FILE" >&2; continue
+  fi
+  echo "▶ publishing doc  $DOC_SRC  →  dist/$DOC_DECK/$DOC_FILE  (+ in-site reader)"
+  cp "$DOC_SRC" "dist/$DOC_DECK/$DOC_FILE"
+  case " $reader_decks " in *" $DOC_DECK "*) : ;; *) reader_decks="$reader_decks $DOC_DECK" ;; esac
+  DOC_HREF=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DOC_FILE")
+  DOC_TITLE_H=$(html_escape "$DOC_TITLE")
+  DOC_DESC_H=$(html_escape "$DOC_DESC")
+  DOC_FILE_H=$(html_escape "$DOC_FILE")
+  # Card = reader link (most of the row) + a small "MD" download pill, mirroring the deck cards.
+  doc_cards="$doc_cards
+      <div class=\"card\">
+        <a class=\"card-main\" href=\"./$DOC_DECK/read.html#$DOC_HREF\">
+          <span class=\"card-doc\" aria-hidden=\"true\"></span>
+          <span class=\"card-body\">
+            <span class=\"card-name\">$DOC_TITLE_H</span>
+            <span class=\"card-note\">$DOC_DESC_H</span>
+          </span>
+        </a>
+        <a class=\"card-pdf\" href=\"./$DOC_DECK/$DOC_HREF\" download=\"$DOC_FILE_H\">MD</a>
+      </div>"
+done
+
+# The in-site Markdown reader, written into each deck folder that has a doc. One page for
+# every doc: it reads ?doc=<file.md>, fetches that SAME-FOLDER file (the name is sanitised
+# to a bare basename so it can't fetch elsewhere), and renders it — markdown-it for the prose
+# and Mermaid for ```mermaid blocks (both from jsDelivr), styled to match the landing page.
+for rd in $reader_decks; do
+  cat > "dist/$rd/read.html" <<'READER'
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading…</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfc; --surface: #ffffff;
+    --ink: #14161b; --muted: #4b5563; --faint: #9aa1ad;
+    --line: #e7e8ec; --accent: #0f766e; --accent-2: #0d9488;
+    --tint: rgba(15,118,110,.05); --code-bg: #f4f5f7;
+    --shadow: 0 1px 2px rgba(20,22,27,.04), 0 10px 30px rgba(20,22,27,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0c11; --surface: #14171f;
+      --ink: #f3f5f7; --muted: #b4bcc8; --faint: #5d6577;
+      --line: #222732; --accent: #2dd4bf; --accent-2: #5eead4;
+      --tint: rgba(45,212,191,.07); --code-bg: #171b22;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.42);
+    }
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+  html,body { margin: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); line-height: 1.7; min-height: 100vh;
+    background: radial-gradient(1000px 560px at 100% -8%, var(--tint), transparent 72%), var(--bg);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  .topbar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .75rem clamp(1rem, 4vw, 2rem);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .back { display: inline-flex; align-items: center; gap: .4rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 600; }
+  .back:hover { color: var(--accent); }
+  .dl {
+    text-decoration: none; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: .45rem .85rem; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); white-space: nowrap;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .dl:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); background: var(--tint); }
+  main { max-width: 720px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 2.6rem) clamp(1.15rem, 5vw, 1.5rem) 5rem; }
+  .doc > :first-child { margin-top: 0; }
+  .doc h1 {
+    font-family: ui-serif, "New York", "Iowan Old Style", Georgia, Cambria, "Times New Roman", serif;
+    font-weight: 600; letter-spacing: -.015em; line-height: 1.1; font-size: clamp(1.9rem, 5vw, 2.6rem); margin: .1rem 0 1.1rem;
+  }
+  .doc h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.01em; margin: 2.2rem 0 .8rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); }
+  .doc h3 { font-size: 1.12rem; font-weight: 700; margin: 1.6rem 0 .5rem; }
+  .doc p { margin: .85rem 0; }
+  .doc a { color: var(--accent); text-underline-offset: 3px; }
+  .doc ul, .doc ol { padding-left: 1.35rem; }
+  .doc li { margin: .3rem 0; }
+  .doc em { color: var(--muted); }
+  .doc strong { color: var(--ink); font-weight: 700; }
+  .doc blockquote { margin: 1rem 0; padding: .5rem 1rem; border-left: 3px solid var(--accent); background: var(--tint); border-radius: 0 8px 8px 0; color: var(--muted); }
+  .doc :not(pre) > code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px; padding: .1em .38em; }
+  .doc pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.15rem; overflow-x: auto; }
+  .doc pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
+  .doc table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .92rem; }
+  .doc th, .doc td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; }
+  .doc th { background: var(--tint); }
+  .doc hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+  .doc .mermaid { display: flex; justify-content: center; margin: 1.4rem 0; padding: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow-x: auto; }
+  .doc .mermaid svg { max-width: 100%; height: auto; }
+  .status { color: var(--faint); padding: 2rem 0; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="../">← All presentations</a>
+    <a class="dl" id="dl" href="#" download>Download .md</a>
+  </div>
+  <main><article class="doc" id="doc"><p class="status">Loading…</p></article></main>
+
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
+    const el = document.getElementById('doc')
+    const dl = document.getElementById('dl')
+    const fail = (m) => { el.innerHTML = '<p class="status">' + m + '</p>' }
+    // The doc is named in the URL HASH (read.html#story.md), not a query — a hash survives the
+    // clean-URL 301 that `serve` (the local preview) does to read.html, and works on GitHub
+    // Pages too. Accept only a bare "<name>.md" in THIS folder — strip anything pointing elsewhere.
+    let file = ''
+    try { file = decodeURIComponent((location.hash || '').replace(/^#/, '')) } catch (_) { file = '' }
+    file = file.replace(/[^\w.\-]/g, '')
+    if (!/^[\w.\-]+\.md$/.test(file)) {
+      fail('No document specified.')
+    } else {
+      dl.href = file; dl.setAttribute('download', file)
+      try {
+        const res = await fetch(file, { cache: 'no-cache' })
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        const src = await res.text()
+        const md = window.markdownit({ html: false, linkify: true, typographer: true })
+        const base = md.renderer.rules.fence || ((t, i, o, e, s) => s.renderToken(t, i, o))
+        md.renderer.rules.fence = (t, i, o, e, s) =>
+          t[i].info.trim() === 'mermaid'
+            ? '<pre class="mermaid">' + md.utils.escapeHtml(t[i].content) + '</pre>'
+            : base(t, i, o, e, s)
+        el.innerHTML = md.render(src)
+        const h1 = el.querySelector('h1')
+        if (h1) document.title = h1.textContent.trim()
+        const dark = matchMedia('(prefers-color-scheme: dark)').matches
+        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: dark ? 'dark' : 'default' })
+        await mermaid.run({ querySelector: '.doc .mermaid' })
+      } catch (err) {
+        fail('Could not load “' + file + '”. ' + (err && err.message ? '(' + err.message + ')' : ''))
+      }
+    }
+  </script>
+</body>
+</html>
+READER
+done
+
+# Optional "Companion documents" section for the landing page (empty when no docs published).
+docs_section=""
+if [ -n "$doc_cards" ]; then
+  docs_section="
+    <section class=\"docs\">
+      <p class=\"sect\">Companion documents</p>
+      <div class=\"list\">$doc_cards
+      </div>
+    </section>"
+fi
+
 count=${#DECKS[@]}
 if [ "$count" -eq 1 ]; then noun="presentation"; else noun="presentations"; fi
 
@@ -132,6 +327,7 @@ cat > dist/index.html <<EOF
     --tint: rgba(15,118,110,.05);
     --shadow: 0 1px 2px rgba(20,22,27,.04), 0 14px 34px rgba(20,22,27,.05);
     --shadow-hover: 0 12px 26px rgba(15,118,110,.10), 0 34px 64px rgba(15,118,110,.10);
+    --doc-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5'/%3E%3Cpath d='M9 13h6M9 17h6'/%3E%3C/svg%3E");
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -211,6 +407,21 @@ cat > dist/index.html <<EOF
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: .8rem; color: var(--muted); word-break: break-all;
   }
+  /* Companion-document cards: a document glyph (mask, so it recolours on hover) + a prose note. */
+  .card-doc {
+    width: 20px; height: 20px; flex: none; align-self: start; margin-top: .12rem;
+    background: var(--faint);
+    -webkit-mask: var(--doc-ico) center / contain no-repeat;
+            mask: var(--doc-ico) center / contain no-repeat;
+    transition: background .2s ease;
+  }
+  .card:hover .card-doc { background: var(--accent); }
+  .card-note { font-size: .84rem; color: var(--muted); line-height: 1.5; }
+  .docs { margin-top: clamp(1.7rem, 4vw, 2.5rem); }
+  .sect {
+    margin: 0 0 .9rem; color: var(--accent); font-size: .72rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .2em;
+  }
   .foot { margin-top: auto; padding-top: 3rem; color: var(--faint); font-size: .82rem; }
   .foot a { color: var(--accent); text-decoration: none; }
   .foot a:hover { text-decoration: underline; }
@@ -231,7 +442,7 @@ cat > dist/index.html <<EOF
       <p class="eyebrow">$count $noun</p>
     </header>
     <section class="list">$cards
-    </section>
+    </section>$docs_section
     <footer class="foot">Built with <a href="https://sli.dev">Slidev</a></footer>
   </main>
 </body>

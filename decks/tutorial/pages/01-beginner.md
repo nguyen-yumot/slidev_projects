@@ -336,7 +336,7 @@ Hover the bottom-left corner of any slide. A toolbar appears, grouped by purpose
 
 <ColHead class="pt-4">Connect &amp; settings</ColHead>
 
-<div class="flex items-center gap-3 pt-1"><span class="inline-flex items-center"><span class="i-ph-arrow-up-bold inline-block text-lg text-green-600"></span><span class="i-ph-arrow-down-bold inline-block text-lg opacity-40"></span></span> Presenter sync status</div>
+<div class="flex items-center gap-3 pt-1"><span class="inline-flex items-center"><span class="i-carbon-arrow-up inline-block text-lg text-green-600"></span><span class="i-carbon-arrow-down inline-block text-lg opacity-40"></span></span> Presenter sync status</div>
 <div class="flex items-center gap-3"><span class="i-carbon-settings-adjust inline-block text-lg"></span> More options menu</div>
 <div class="flex items-center gap-3"><span class="deck-chip">{{ $page }}/{{ $nav.total }}</span> Click to jump to a slide</div>
 
